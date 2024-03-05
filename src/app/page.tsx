@@ -102,7 +102,7 @@ export default function Home() {
           {todos.length > 0 ? (
             todos.map((todo) => (
               <div
-                className="mt-3 flex items-center justify-between shadow-lg px-5 py-2"
+                className="mt-3 flex items-center justify-between shadow-lg px-5 py-2 transition-all hover:bg-emerald-200"
                 key={todo.id}
               >
                 <div className="flex gap-5 items-center">
