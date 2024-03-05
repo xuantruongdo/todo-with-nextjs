@@ -1,9 +1,5 @@
-export {};
-
-declare global {
-  interface ITodo {
-    id: string;
-    name: string;
-    status: string;
-  }
+export interface ITodo {
+  id: string;
+  name: string;
+  status: string;
 }

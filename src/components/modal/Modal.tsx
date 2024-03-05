@@ -1,3 +1,5 @@
+import { ITodo } from "@/types/todo.interface";
+
 interface IProps {
   isModalOpen: boolean;
   closeModal: () => void;

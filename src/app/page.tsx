@@ -4,11 +4,12 @@ import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Draft, produce } from "immer";
 import Modal from "@/components/modal/Modal";
+import { ITodo } from "@/types/todo.interface";
 
 export default function Home() {
   const [todos, setTodos] = useState<ITodo[]>([]);
   const [name, setName] = useState<string>("");
-  const [todoInfo, setTodoInfo] = useState<ITodo | undefined>();
+  const [todoInfo, setTodoInfo] = useState<ITodo | null>();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const openModal = () => {
@@ -17,7 +18,7 @@ export default function Home() {
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setTodoInfo(undefined);
+    setTodoInfo(null);
   };
 
   const handleAddTodo = () => {
