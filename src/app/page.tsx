@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import Modal from "./components/modal/Modal";
 import { Draft, produce } from "immer";
+import Modal from "@/components/modal/Modal";
 
 export default function Home() {
   const [todos, setTodos] = useState<ITodo[]>([]);
