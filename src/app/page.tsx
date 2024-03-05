@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import Modal from "./modal";
+import Modal from "./components/modal/Modal";
+import { Draft, produce } from "immer";
 
 export default function Home() {
   const [todos, setTodos] = useState<ITodo[]>([]);
@@ -16,7 +17,7 @@ export default function Home() {
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setTodoInfo(undefined)
+    setTodoInfo(undefined);
   };
 
   const handleAddTodo = () => {
@@ -26,7 +27,7 @@ export default function Home() {
       name: name,
       status: "Open",
     };
-    setTodos((prev) => [newTodo, ...todos]);
+    setTodos(() => [newTodo, ...todos]);
     setName("");
   };
 
@@ -36,31 +37,36 @@ export default function Home() {
 
   const handleOpenModal = (id: string) => {
     openModal();
-    setTodoInfo((prev) => todos.find((todo: ITodo) => todo.id === id));
+    setTodoInfo(() => todos.find((todo: ITodo) => todo.id === id));
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<any>) => {
     const { name, value } = e.target;
-    setTodoInfo((prevState: any) => ({
-      ...prevState,
-      [name]: value,
-    }));
+
+    const nextState = produce((draft) => {
+      draft[name] = value;
+    });
+
+    setTodoInfo(nextState);
   };
 
   const handleSaveTodo = () => {
-    const data = {
+    if (!todoInfo?.name || !todoInfo?.status) return;
+    const updateData = {
       name: todoInfo?.name,
       status: todoInfo?.status,
     };
 
-    let updatedTodos: any = todos.map((todo: ITodo) => {
-      if (todo.id === todoInfo?.id) {
-        return { ...todo, ...data };
+    const nextState = produce((draft) => {
+      const todoIndex = draft.findIndex(
+        (todo: ITodo) => todo.id === todoInfo?.id
+      );
+      if (todoIndex !== -1) {
+        draft[todoIndex] = { ...draft[todoIndex], ...updateData };
       }
-      return todo;
     });
 
-    setTodos(updatedTodos);
+    setTodos(nextState);
     closeModal();
   };
 
