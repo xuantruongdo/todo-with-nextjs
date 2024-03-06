@@ -1,3 +1,4 @@
+import { useAppSelector } from "@/lib/hook";
 import { ITodo } from "@/types/todo.interface";
 
 interface IProps {
@@ -16,6 +17,8 @@ const Modal = (props: IProps) => {
     handleSaveTodo,
     handleInputChange,
   } = props;
+
+  const users = useAppSelector((state) => state.userReducer);
 
   return (
     <>
@@ -77,6 +80,29 @@ const Modal = (props: IProps) => {
                   <option value="Open">Open</option>
                   <option value="InProcess">In process</option>
                   <option value="Done">Done</option>
+                </select>
+
+                <input
+                  name="deadline"
+                  type="date"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  placeholder="Select date"
+                  value={todoInfo?.deadline}
+                  onChange={(e) => handleInputChange(e)}
+                />
+
+                <select
+                  name="assignment"
+                  value={todoInfo?.assignment}
+                  onChange={(e) => handleInputChange(e)}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                >
+                  <option disabled>Choose</option>
+                  {users?.map((user, index) => (
+                    <option value={user.email} key={index}>
+                      {user.name}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
