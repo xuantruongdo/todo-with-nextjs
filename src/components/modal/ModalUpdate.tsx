@@ -2,27 +2,27 @@ import { useAppSelector } from "@/lib/hook";
 import { ITodo } from "@/types/todo.interface";
 
 interface IProps {
-  isModalOpen: boolean;
+  isModalUpdateOpen: boolean;
   closeModal: () => void;
   todoInfo: ITodo;
   handleSaveTodo: () => void;
-  handleInputChange: (e: React.ChangeEvent<any>) => void;
+  handleInputUpdateChange: (e: React.ChangeEvent<any>) => void;
 }
 
 const ModalUpdate = (props: IProps) => {
   const {
-    isModalOpen,
+    isModalUpdateOpen,
     closeModal,
     todoInfo,
     handleSaveTodo,
-    handleInputChange,
+    handleInputUpdateChange,
   } = props;
 
   const users = useAppSelector((state) => state.userReducer);
 
   return (
     <>
-      {isModalOpen && (
+      {isModalUpdateOpen && (
         <div
           id="modal"
           tabIndex={-1}
@@ -67,12 +67,12 @@ const ModalUpdate = (props: IProps) => {
                   placeholder="New task..."
                   required
                   value={todoInfo?.name}
-                  onChange={(e) => handleInputChange(e)}
+                  onChange={handleInputUpdateChange}
                 />
                 <select
                   name="status"
                   value={todoInfo?.status}
-                  onChange={(e) => handleInputChange(e)}
+                  onChange={handleInputUpdateChange}
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 >
                   <option disabled>Choose a status</option>
@@ -88,13 +88,13 @@ const ModalUpdate = (props: IProps) => {
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="Select date"
                   value={todoInfo?.deadline}
-                  onChange={(e) => handleInputChange(e)}
+                  onChange={handleInputUpdateChange}
                 />
 
                 <select
                   name="assignment"
                   value={todoInfo?.assignment}
-                  onChange={(e) => handleInputChange(e)}
+                  onChange={handleInputUpdateChange}
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 >
                   <option disabled>Choose</option>

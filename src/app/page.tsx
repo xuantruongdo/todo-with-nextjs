@@ -9,15 +9,26 @@ import { useAppDispatch, useAppSelector } from "@/lib/hook";
 import { useRouter } from "next/navigation";
 import { checkValidDeadline } from "@/helpers/checkValidDeadline";
 import ModalAdd from "@/components/modal/ModalAdd";
-import { IFilter } from "@/types/filter.interface";
+import {
+  doAddTodoAction,
+  doDeleteTodoAction,
+  doUpdateTodoAction,
+} from "@/lib/features/todo/todoSlice";
 
 export default function Home() {
-  const [name, setName] = useState<string>("");
-  const [date, setDate] = useState<string>("");
-  const [assignment, setAssignment] = useState<string>("");
+  const [newTodo, setNewTodo] = useState({
+    name: "",
+    date: "",
+    assignment: "",
+  });
   const [todoInfo, setTodoInfo] = useState<ITodo | null>();
-  const [filter, setFilter] = useState<IFilter | any>();
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [filter, setFilter] = useState({
+    name: "",
+    assignment: "",
+    from: "",
+    to: "",
+  });
+  const [isModalUpdateOpen, setIsModalUpdateOpen] = useState<boolean>(false);
   const [isModalAddOpen, setIsModalAddOpen] = useState<boolean>(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -28,11 +39,11 @@ export default function Home() {
   const [totalPage, setTotalPage] = useState<number>(1);
 
   const openModalUpdate = () => {
-    setIsModalOpen(true);
+    setIsModalUpdateOpen(true);
   };
 
   const closeModal = () => {
-    setIsModalOpen(false);
+    setIsModalUpdateOpen(false);
     setTodoInfo(null);
   };
 
@@ -41,7 +52,7 @@ export default function Home() {
   };
 
   const handleAddTodo = () => {
-    console.log(date);
+    const { name, date, assignment } = newTodo;
     if (!name || !date || !assignment) {
       alert("Please fill in all information completely");
       return;
@@ -55,7 +66,7 @@ export default function Home() {
       return;
     }
 
-    const newTodo = {
+    const data = {
       id: uuidv4(),
       name: name,
       status: "Open",
@@ -63,15 +74,18 @@ export default function Home() {
       assignment: assignment,
     };
 
-    setTodos([newTodo, ...todos]);
+    dispatch(doAddTodoAction(data));
     setIsModalAddOpen(false);
-    setName("");
-    setDate("");
-    setAssignment("");
+    setNewTodo({
+      name: "",
+      date: "",
+      assignment: "",
+    });
   };
 
   const handleDeleteTodo = (id: string) => {
     setTodos((prev) => prev.filter((todo: ITodo) => todo.id !== id));
+    dispatch(doDeleteTodoAction(id));
   };
 
   const handleOpenModal = (id: string) => {
@@ -79,7 +93,17 @@ export default function Home() {
     setTodoInfo(() => todos.find((todo: ITodo) => todo.id === id));
   };
 
-  const handleInputChange = (e: React.ChangeEvent<any>) => {
+  const handleInputAddChange = (e: React.ChangeEvent<any>) => {
+    const { name, value } = e.target;
+
+    const nextState = produce((draft) => {
+      draft[name] = value;
+    });
+
+    setNewTodo(nextState);
+  };
+
+  const handleInputUpdateChange = (e: React.ChangeEvent<any>) => {
     const { name, value } = e.target;
 
     const nextState = produce((draft) => {
@@ -91,10 +115,12 @@ export default function Home() {
 
   const handleFilterChange = (e: React.ChangeEvent<any>) => {
     const { name, value } = e.target;
-    setFilter((prevState: any) => ({
-      ...prevState,
-      [name]: value,
-    }));
+
+    const nextState = produce((draft) => {
+      draft[name] = value;
+    });
+
+    setFilter(nextState);
   };
 
   const handleSaveTodo = () => {
@@ -126,30 +152,42 @@ export default function Home() {
       const todoIndex = draft.findIndex(
         (todo: ITodo) => todo.id === todoInfo?.id
       );
-
       if (todoIndex !== -1) {
         draft[todoIndex] = { ...draft[todoIndex], ...updateData };
       }
     });
 
     setTodos(nextState);
+    dispatch(doUpdateTodoAction({ id: todoInfo?.id, updateData }));
 
     closeModal();
   };
 
   const handleFilter = () => {
-    const { nameFilter, assignmentFilter } = filter;
-    if (!nameFilter || !assignmentFilter) {
-      alert("Please fill in all information completely");
+    const { name, assignment, from, to } = filter;
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+
+    if (!checkValidDeadline(toDate, fromDate)) {
+      alert("The fromDate is on or before the toDate and time.");
       return;
     }
-    setTodos(
-      globalTodos.filter(
-        (todo) =>
-          (nameFilter && todo.name.toLowerCase().includes(nameFilter.toLowerCase())) &&
-          (assignmentFilter && todo.assignment.toLowerCase().includes(assignmentFilter.toLowerCase()))
-      )
-    );
+
+    const filteredTodos = globalTodos.filter((todo) => {
+      const matchName =
+        !name || todo.name.toLowerCase().includes(name.toLowerCase());
+      const matchAssignment =
+        !assignment ||
+        todo.assignment.toLowerCase().includes(assignment.toLowerCase());
+
+      const todoDeadline = new Date(todo.deadline);
+      const matchDeadline =
+        (!from || todoDeadline >= fromDate) && (!to || todoDeadline <= toDate);
+
+      return matchName && matchAssignment && matchDeadline;
+    });
+
+    setTodos(filteredTodos);
   };
 
   const handlePaginate = (type: string) => {
@@ -170,7 +208,7 @@ export default function Home() {
       setTotalPage(Math.ceil(globalTodos.length / limit));
       setTodos(globalTodos.slice(startIndex, endIndex));
     }
-  }, [page]);
+  }, [page, globalTodos]);
 
   return (
     <div className="container flex justify-center h-screen">
@@ -194,34 +232,58 @@ export default function Home() {
         </button>
 
         <div className="grid grid-cols-2 gap-4">
-          <div className="my-5">
+          <div className="mt-5">
             <label htmlFor="nameFilter" className="text-slate-400 text-sm">
               Task name:
             </label>
             <input
-              name="nameFilter"
+              name="name"
               type="text"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="New task..."
+              placeholder="Name..."
               required
-              value={filter?.nameFilter}
+              value={filter?.name}
               onChange={handleFilterChange}
             />
           </div>
-          <div className="my-5">
-            <label
-              htmlFor="assignmentFilter"
-              className="text-slate-400 text-sm"
-            >
+          <div className="mt-5">
+            <label htmlFor="assignment" className="text-slate-400 text-sm">
               Assignment:
             </label>
             <input
-              name="assignmentFilter"
+              name="assignment"
               type="text"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="New task..."
+              placeholder="Assignment..."
               required
-              value={filter?.assignmentFilter}
+              value={filter?.assignment}
+              onChange={handleFilterChange}
+            />
+          </div>
+
+          <div className="mb-5">
+            <label htmlFor="from" className="text-slate-400 text-sm">
+              From:
+            </label>
+            <input
+              name="from"
+              type="date"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Select date"
+              value={filter?.from}
+              onChange={handleFilterChange}
+            />
+          </div>
+          <div className="mb-5">
+            <label htmlFor="to" className="text-slate-400 text-sm">
+              To:
+            </label>
+            <input
+              name="to"
+              type="date"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Select date"
+              value={filter?.to}
               onChange={handleFilterChange}
             />
           </div>
@@ -238,12 +300,8 @@ export default function Home() {
           isModalAddOpen={isModalAddOpen}
           closeModalAdd={closeModalAdd}
           handleAddTodo={handleAddTodo}
-          name={name}
-          setName={setName}
-          date={date}
-          setDate={setDate}
-          assignment={assignment}
-          setAssignment={setAssignment}
+          newTodo={newTodo}
+          handleInputAddChange={handleInputAddChange}
         />
 
         <div className="mt-4">
@@ -289,31 +347,34 @@ export default function Home() {
           ) : (
             <h2 className="mt-5 text-center">No data...</h2>
           )}
-          <div className="flex items-center justify-center mt-10">
-            <button
-              className="flex items-center justify-center px-3 h-8 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-              onClick={() => handlePaginate("previous")}
-              disabled={page === 1}
-            >
-              Previous
-            </button>
 
-            <button
-              className="flex items-center justify-center px-3 h-8 ms-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-              onClick={() => handlePaginate("next")}
-              disabled={page === totalPage}
-            >
-              Next
-            </button>
-          </div>
+          {totalPage > 1 && (
+            <div className="flex items-center justify-center mt-10">
+              <button
+                className="flex items-center justify-center px-3 h-8 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                onClick={() => handlePaginate("previous")}
+                disabled={page === 1}
+              >
+                Previous
+              </button>
+
+              <button
+                className="flex items-center justify-center px-3 h-8 ms-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                onClick={() => handlePaginate("next")}
+                disabled={page === totalPage}
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
 
         <Modal
-          isModalOpen={isModalOpen}
+          isModalUpdateOpen={isModalUpdateOpen}
           closeModal={closeModal}
           todoInfo={todoInfo!}
           handleSaveTodo={handleSaveTodo}
-          handleInputChange={handleInputChange}
+          handleInputUpdateChange={handleInputUpdateChange}
         />
       </div>
     </div>

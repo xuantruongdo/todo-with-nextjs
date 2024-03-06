@@ -5,3 +5,9 @@ export interface ITodo {
   deadline: string;
   assignment: string;
 }
+
+export interface INewTodo {
+  name: string;
+  date: string;
+  assignment: string;
+}

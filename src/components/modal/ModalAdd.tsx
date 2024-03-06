@@ -1,28 +1,21 @@
 "use client";
 import { useAppSelector } from "@/lib/hook";
+import { INewTodo } from "@/types/todo.interface";
 
 interface IProps {
   isModalAddOpen: boolean;
   closeModalAdd: () => void;
   handleAddTodo: () => void;
-  name: string;
-  setName: (name: string) => void;
-  date: string;
-  setDate: (date: string) => void;
-  assignment: string;
-  setAssignment: (assignment: string) => void;
+  newTodo: INewTodo;
+  handleInputAddChange: (e: React.ChangeEvent<any>) => void;
 }
 const ModalAdd = (props: IProps) => {
   const {
     isModalAddOpen,
     closeModalAdd,
     handleAddTodo,
-    name,
-    setName,
-    date,
-    setDate,
-    assignment,
-    setAssignment,
+    newTodo,
+    handleInputAddChange
   } = props;
 
   const users = useAppSelector((state) => state.userReducer);
@@ -73,24 +66,24 @@ const ModalAdd = (props: IProps) => {
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="New task..."
                   required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={newTodo?.name}
+                  onChange={handleInputAddChange}
                 />
 
                 <input
-                  name="deadline"
+                  name="date"
                   type="date"
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="Select date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  value={newTodo?.date}
+                  onChange={handleInputAddChange}
                 />
 
                 <select
                   name="assignment"
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  value={assignment}
-                  onChange={(e) => setAssignment(e.target.value)}
+                  value={newTodo?.assignment}
+                  onChange={handleInputAddChange}
                 >
                   <option value={""}>Choose</option>
                   {users?.map((user, index) => (

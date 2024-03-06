@@ -20,7 +20,7 @@ const initialState: ITodo[] = [
   {
     id: "3",
     name: "Todo 3",
-    deadline: "2024-03-09",
+    deadline: "2024-03-12",
     status: "Open",
     assignment: "Truong 3",
   },
@@ -46,12 +46,16 @@ export const todo = createSlice({
   reducers: {
     reset: () => initialState,
     doAddTodoAction: (state, action) => {
-      state.unshift(action.payload);
-      return state;
+      state.push(action.payload);
     },
 
     doUpdateTodoAction: (state, action) => {
-      state = action.payload;
+      const id = action.payload.id;
+      const updateData = action.payload.updateData;
+      const todoIndex = state.findIndex(todo => todo.id = id)
+      if (todoIndex !== -1) {
+        state[todoIndex] = { ...state[todoIndex], ...updateData };
+      }
       return state;
     },
 
