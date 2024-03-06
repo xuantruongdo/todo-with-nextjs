@@ -1,10 +1,35 @@
 "use client";
 import { useAppSelector } from "@/lib/hook";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const ListUserPage = () => {
   const router = useRouter();
-    const users = useAppSelector((state) => state.userReducer);
+  const [page, setPage] = useState<number>(1);
+  const globalUsers = useAppSelector((state) => state.userReducer);
+  const [users, setUsers] = useState(globalUsers);
+  const [totalPage, setTotalPage] = useState<number>(1);
+
+  const handlePaginate = (type: string) => {
+    if (type === "previous") {
+      setPage((prev) => prev - 1);
+    }
+    if (type === "next") {
+      setPage((prev) => prev + 1);
+    }
+  };
+
+  useEffect(() => {
+    if (page > 0) {
+      const limit = 4;
+
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      setTotalPage(Math.ceil(globalUsers.length / limit));
+      setUsers(globalUsers.slice(startIndex, endIndex));
+    }
+  }, [page]);
+
   return (
     <div className="mx-10 my-5">
       <h2 className="text-2xl font-semibold text-center text-green-950">
@@ -56,6 +81,23 @@ const ListUserPage = () => {
             ))}
           </tbody>
         </table>
+        <div className="flex items-center justify-center mt-10">
+          <button
+            className="flex items-center justify-center px-3 h-8 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+            onClick={() => handlePaginate("previous")}
+            disabled={page === 1}
+          >
+            Previous
+          </button>
+
+          <button
+            className="flex items-center justify-center px-3 h-8 ms-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+            onClick={() => handlePaginate("next")}
+            disabled={page === totalPage}
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );

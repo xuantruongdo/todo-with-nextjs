@@ -1,7 +1,44 @@
 import { ITodo } from "@/types/todo.interface";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { produce } from "immer";
 
-const initialState: ITodo[] = [];
+const initialState: ITodo[] = [
+  {
+    id: "1",
+    name: "Todo 1",
+    deadline: "2024-03-09",
+    status: "Open",
+    assignment: "Truong 1",
+  },
+  {
+    id: "2",
+    name: "Todo 2",
+    deadline: "2024-03-09",
+    status: "Open",
+    assignment: "Truong 1",
+  },
+  {
+    id: "3",
+    name: "Todo 3",
+    deadline: "2024-03-09",
+    status: "Open",
+    assignment: "Truong 3",
+  },
+  {
+    id: "4",
+    name: "Todo 4",
+    deadline: "2024-03-09",
+    status: "Open",
+    assignment: "Truong 1",
+  },
+  {
+    id: "5",
+    name: "Todo 5",
+    deadline: "2024-03-09",
+    status: "Open",
+    assignment: "Truong 1",
+  },
+];
 
 export const todo = createSlice({
   name: "todo",
@@ -10,6 +47,7 @@ export const todo = createSlice({
     reset: () => initialState,
     doAddTodoAction: (state, action) => {
       state.unshift(action.payload);
+      return state;
     },
 
     doUpdateTodoAction: (state, action) => {
@@ -22,8 +60,14 @@ export const todo = createSlice({
       state = state.filter((todo: ITodo) => todo.id !== id);
       return state;
     },
+
   },
 });
 
-export const { doAddTodoAction, doUpdateTodoAction, doDeleteTodoAction, reset } = todo.actions;
+export const {
+  doAddTodoAction,
+  doUpdateTodoAction,
+  doDeleteTodoAction,
+  reset,
+} = todo.actions;
 export default todo.reducer;
