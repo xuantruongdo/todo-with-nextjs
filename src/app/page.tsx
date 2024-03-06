@@ -77,7 +77,6 @@ export default function Home() {
   };
 
   const handleSaveTodo = () => {
-    if (!todoInfo?.name || !todoInfo?.status) return;
     if (!todoInfo?.name || !todoInfo?.status || !todoInfo?.deadline || !todoInfo?.assignment) {
       alert("Please fill in all information completely");
       return;
@@ -97,14 +96,16 @@ export default function Home() {
       assignment: todoInfo?.assignment
     };
 
-    let updatedTodos: any = todos.map((todo: ITodo) => {
-      if (todo.id === todoInfo?.id) {
-        return { ...todo, ...updateData };
+    const nextState = produce(todos, draft => {
+      const todoIndex = draft.findIndex((todo: ITodo) => todo.id === todoInfo?.id);
+    
+      if (todoIndex !== -1) {
+        draft[todoIndex] = { ...draft[todoIndex], ...updateData };
       }
-      return todo;
     });
-
-    dispatch(doUpdateTodoAction(updatedTodos))
+    
+    dispatch(doUpdateTodoAction(nextState));
+    
     closeModal();
   };
 
