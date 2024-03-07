@@ -3,7 +3,7 @@ import React, { useState } from "react";
 
 interface IModalProps {
   title: string;
-  children: React.ReactNode;
+  content: React.ReactNode;
   submitBtn: string;
   closeBtn?: string;
   confirmAction: () => void;
@@ -11,7 +11,7 @@ interface IModalProps {
 
 const Modal = ({
   title,
-  children,
+  content,
   submitBtn,
   closeBtn = "Cancel",
   confirmAction,
@@ -77,7 +77,7 @@ const Modal = ({
                   <span className="sr-only">Close modal</span>
                 </button>
               </div>
-              <div className="p-4 md:p-5 space-y-4">{children}</div>
+              <div className="p-4 md:p-5 space-y-4">{content}</div>
               <div className="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
                 <button
                   data-modal-hide="default-modal"

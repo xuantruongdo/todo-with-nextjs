@@ -146,7 +146,7 @@ export default function Home() {
 
         <Modal
           title="Add Todo"
-          children={
+          content={
             <FormAdd
               todoInfo={todoInfo}
               handleInputChange={handleInputChange}

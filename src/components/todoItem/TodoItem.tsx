@@ -95,7 +95,7 @@ const TodoItem = (props: IProps) => {
       <div className="flex">
         <Modal
           title="Update Todo"
-          children={
+          content={
             <FormUpdate
               todoInfo={todoInfo}
               handleInputChange={handleInputChange}
@@ -108,7 +108,7 @@ const TodoItem = (props: IProps) => {
 
         <Modal
           title="Delete Todo"
-          children={<FormDelete />}
+          content={<FormDelete />}
           submitBtn="Delete"
           closeBtn="Cancel"
           confirmAction={() => handleDeleteTodo(todo.id)}
