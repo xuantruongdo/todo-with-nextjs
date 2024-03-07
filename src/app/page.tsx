@@ -9,16 +9,12 @@ import { useRouter } from "next/navigation";
 import { checkValidDeadline } from "@/helpers/checkValidDeadline";
 import {
   doAddTodoAction,
-  doDeleteTodoAction,
-  doUpdateTodoAction,
 } from "@/lib/features/todo/todoSlice";
 import Pagination from "@/components/pagination/Pagination";
 import TodoItem from "@/components/todoItem/TodoItem";
-import useModal from "@/hooks/useModal";
 import FormAdd from "@/components/form/FormAdd";
-import FormUpdate from "@/components/form/FormUpdate";
-import FormDelete from "@/components/form/FormDelete";
 import FormFilter from "@/components/form/FormFilter";
+import Modal from "@/components/modal/Modal";
 
 export default function Home() {
   const [todoInfo, setTodoInfo] = useState<ITodo | any>();
@@ -34,9 +30,7 @@ export default function Home() {
   const [todos, setTodos] = useState<ITodo[]>(globalTodos);
   const [page, setPage] = useState<number>(1);
   const [totalPage, setTotalPage] = useState<number>(1);
-  const [idDelete, setIdDelete] = useState<string>("");
 
-  
   const handleAddTodo = (): void => {
     const { name, deadline, assignment } = todoInfo;
     if (!name || !deadline || !assignment) {
@@ -61,68 +55,11 @@ export default function Home() {
     };
 
     dispatch(doAddTodoAction(data));
-    closeModalAdd();
     setTodoInfo({
       name: "",
       deadline: "",
       assignment: "",
     });
-  };
-
-  const handleDeleteTodo = () => {
-    setTodos((prev) => prev.filter((todo: ITodo) => todo.id !== idDelete));
-    dispatch(doDeleteTodoAction(idDelete));
-    closeModalDelete();
-  };
-
-  const handleSaveTodo = () => {
-    if (
-      !todoInfo?.name ||
-      !todoInfo?.status ||
-      !todoInfo?.deadline ||
-      !todoInfo?.assignment
-    ) {
-      alert("Please fill in all information completely");
-      return;
-    }
-
-    const selectDate = new Date(todoInfo?.deadline);
-    const currentDate = new Date();
-
-    if (!checkValidDeadline(selectDate, currentDate)) {
-      alert("The date is on or before the current date and time.");
-      return;
-    }
-    const updateData = {
-      name: todoInfo?.name,
-      status: todoInfo?.status,
-      deadline: todoInfo?.deadline,
-      assignment: todoInfo?.assignment,
-    };
-
-    const nextState = produce(todos, (draft) => {
-      const todoIndex = draft.findIndex(
-        (todo: ITodo) => todo.id === todoInfo?.id
-      );
-      if (todoIndex !== -1) {
-        draft[todoIndex] = { ...draft[todoIndex], ...updateData };
-      }
-    });
-
-    setTodos(nextState);
-    dispatch(doUpdateTodoAction({ id: todoInfo?.id, updateData }));
-
-    closeModalUpdate();
-  };
-
-  const handleOpenModalUpdate = (id: string) => {
-    openModalUpdate();
-    setTodoInfo(() => todos.find((todo: ITodo) => todo.id === id));
-  };
-
-  const handleOpenModalDelete = (id: string) => {
-    openModalDelete();
-    setIdDelete(id);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -194,37 +131,6 @@ export default function Home() {
     }
   }, [page, globalTodos]);
 
-  const {
-    modal: modalAdd, openModal: openModalAdd, closeModal: closeModalAdd,} = useModal({
-    title: "Add Todo",
-    content: (
-      <FormAdd todoInfo={todoInfo} handleInputChange={handleInputChange} />
-    ),
-    submitBtn: "Add",
-    closeBtn: "Cancel",
-    confirmAction: handleAddTodo,
-  });
-
-  const { modal: modalUpdate, openModal: openModalUpdate, closeModal: closeModalUpdate,} = useModal({
-    title: "Update Todo",
-    content: (
-      <FormUpdate todoInfo={todoInfo} handleInputChange={handleInputChange} />
-    ),
-    submitBtn: "Save",
-    closeBtn: "Cancel",
-    confirmAction: handleSaveTodo,
-  });
-
-  const {modal: modalDelete, openModal: openModalDelete, closeModal: closeModalDelete,} = useModal({
-    title: "Delete Todo",
-    content: (
-      <FormDelete />
-    ),
-    submitBtn: "Delete",
-    closeBtn: "Cancel",
-    confirmAction: handleDeleteTodo,
-  });
-
   return (
     <div className="flex justify-center items-center">
       <div className="bg-white p-4 rounded-md shadow-md min-w-[50%]">
@@ -238,15 +144,24 @@ export default function Home() {
           </button>
         </div>
 
-        <button
-          type="button"
-          className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-          onClick={openModalAdd}
-        >
-          Add Todo
-        </button>
+        <Modal
+          title="Add Todo"
+          children={
+            <FormAdd
+              todoInfo={todoInfo}
+              handleInputChange={handleInputChange}
+            />
+          }
+          submitBtn="Add"
+          closeBtn="Cancel"
+          confirmAction={handleAddTodo}
+        />
 
-        <FormFilter filter={filter} handleFilterChange={handleFilterChange} clearFilter={clearFilter} />
+        <FormFilter
+          filter={filter}
+          handleFilterChange={handleFilterChange}
+          clearFilter={clearFilter}
+        />
 
         <div className="mt-4">
           {todos.length > 0 ? (
@@ -254,8 +169,8 @@ export default function Home() {
               <TodoItem
                 key={todo.id}
                 todo={todo}
-                handleOpenModalUpdate={handleOpenModalUpdate}
-                handleOpenModalDelete={handleOpenModalDelete}
+                todos={todos}
+                setTodos={setTodos}
               />
             ))
           ) : (
@@ -264,10 +179,6 @@ export default function Home() {
 
           <Pagination page={page} setPage={setPage} totalPage={totalPage} />
         </div>
-
-        {modalAdd}
-        {modalUpdate}
-        {modalDelete}
       </div>
     </div>
   );
