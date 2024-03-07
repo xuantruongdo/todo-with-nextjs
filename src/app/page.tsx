@@ -32,7 +32,7 @@ export default function Home() {
   const [isModalAddOpen, setIsModalAddOpen] = useState<boolean>(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
-
+  const users = useAppSelector((state) => state.userReducer);
   const globalTodos = useAppSelector((state) => state.todoReducer);
   const [todos, setTodos] = useState<ITodo[]>(globalTodos);
   const [page, setPage] = useState<number>(1);
@@ -88,41 +88,6 @@ export default function Home() {
     dispatch(doDeleteTodoAction(id));
   };
 
-  const handleOpenModal = (id: string) => {
-    openModalUpdate();
-    setTodoInfo(() => todos.find((todo: ITodo) => todo.id === id));
-  };
-
-  const handleInputAddChange = (e: React.ChangeEvent<any>) => {
-    const { name, value } = e.target;
-
-    const nextState = produce((draft) => {
-      draft[name] = value;
-    });
-
-    setNewTodo(nextState);
-  };
-
-  const handleInputUpdateChange = (e: React.ChangeEvent<any>) => {
-    const { name, value } = e.target;
-
-    const nextState = produce((draft) => {
-      draft[name] = value;
-    });
-
-    setTodoInfo(nextState);
-  };
-
-  const handleFilterChange = (e: React.ChangeEvent<any>) => {
-    const { name, value } = e.target;
-
-    const nextState = produce((draft) => {
-      draft[name] = value;
-    });
-
-    setFilter(nextState);
-  };
-
   const handleSaveTodo = () => {
     if (
       !todoInfo?.name ||
@@ -163,10 +128,45 @@ export default function Home() {
     closeModal();
   };
 
+  const handleOpenModal = (id: string) => {
+    openModalUpdate();
+    setTodoInfo(() => todos.find((todo: ITodo) => todo.id === id));
+  };
+
+  const handleInputAddChange = (e: React.ChangeEvent<any>) => {
+    const { name, value } = e.target;
+
+    const nextState = produce((draft) => {
+      draft[name] = value;
+    });
+
+    setNewTodo(nextState);
+  };
+
+  const handleInputUpdateChange = (e: React.ChangeEvent<any>) => {
+    const { name, value } = e.target;
+
+    const nextState = produce((draft) => {
+      draft[name] = value;
+    });
+
+    setTodoInfo(nextState);
+  };
+
+  const handleFilterChange = (e: React.ChangeEvent<any>) => {
+    const { name, value } = e.target;
+
+    const nextState = produce((draft) => {
+      draft[name] = value;
+    });
+
+    setFilter(nextState);
+  };
+
   const handleFilter = () => {
     const { name, assignment, from, to } = filter;
-    const fromDate = new Date(from);
-    const toDate = new Date(to);
+    const fromDate = new Date(from) || new Date();
+    const toDate = new Date(to) || new Date();
 
     if (!checkValidDeadline(toDate, fromDate)) {
       alert("The fromDate is on or before the toDate and time.");
@@ -191,6 +191,10 @@ export default function Home() {
   };
 
   const handlePaginate = (type: string) => {
+    if (type !== "previous" && type !== "next") {
+      setPage(parseInt(type));
+    }
+
     if (type === "previous") {
       setPage((prev) => prev - 1);
     }
@@ -198,6 +202,19 @@ export default function Home() {
       setPage((prev) => prev + 1);
     }
   };
+
+  const clearFilter = () => {
+    setFilter({
+      name: "",
+      assignment: "",
+      from: "",
+      to: "",
+    });
+  };
+
+  useEffect(() => {
+    handleFilter();
+  }, [filter]);
 
   useEffect(() => {
     if (page > 0) {
@@ -211,7 +228,7 @@ export default function Home() {
   }, [page, globalTodos]);
 
   return (
-    <div className="container flex justify-center h-screen">
+    <div className="container flex justify-center">
       <div className="mt-5 w-1/2">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-2xl font-semibold">Todo List</h2>
@@ -250,15 +267,20 @@ export default function Home() {
             <label htmlFor="assignment" className="text-slate-400 text-sm">
               Assignment:
             </label>
-            <input
+
+            <select
               name="assignment"
-              type="text"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Assignment..."
-              required
               value={filter?.assignment}
               onChange={handleFilterChange}
-            />
+            >
+              <option value={""}>Choose</option>
+              {users?.map((user, index) => (
+                <option value={user.email} key={index}>
+                  {user.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="mb-5">
@@ -290,19 +312,11 @@ export default function Home() {
         </div>
         <button
           type="button"
-          className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-          onClick={handleFilter}
+          className="w-full py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+          onClick={clearFilter}
         >
-          Search
+          Clear
         </button>
-
-        <ModalAdd
-          isModalAddOpen={isModalAddOpen}
-          closeModalAdd={closeModalAdd}
-          handleAddTodo={handleAddTodo}
-          newTodo={newTodo}
-          handleInputAddChange={handleInputAddChange}
-        />
 
         <div className="mt-4">
           {todos.length > 0 ? (
@@ -348,26 +362,54 @@ export default function Home() {
             <h2 className="mt-5 text-center">No data...</h2>
           )}
 
-          {totalPage > 1 && (
-            <div className="flex items-center justify-center mt-10">
-              <button
-                className="flex items-center justify-center px-3 h-8 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                onClick={() => handlePaginate("previous")}
-                disabled={page === 1}
-              >
-                Previous
-              </button>
+          <div className="flex items-center justify-center py-5">
+            <button
+              className={`flex items-center justify-center px-3 h-8 ms-3 text-sm font-medium ${
+                page === 1
+                  ? "bg-gray-300 text-gray-500 border border-gray-300 rounded-md px-4 py-2 disabled cursor-not-allowed"
+                  : "flex items-center justify-center px-3 h-8 ms-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+              } rounded-lg`}
+              onClick={() => handlePaginate("previous")}
+              disabled={page === 1}
+            >
+              Previous
+            </button>
 
+            {Array.from({ length: totalPage }, (_, index) => (
               <button
-                className="flex items-center justify-center px-3 h-8 ms-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                onClick={() => handlePaginate("next")}
-                disabled={page === totalPage}
+                key={index + 1}
+                className={`flex items-center justify-center px-3 h-8 ms-3 text-sm font-medium ${
+                  page === index + 1
+                    ? "text-white bg-blue-500"
+                    : "text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                } rounded-lg`}
+                onClick={() => handlePaginate(`${index + 1}`)}
               >
-                Next
+                {index + 1}
               </button>
-            </div>
-          )}
+            ))}
+
+            <button
+              className={`flex items-center justify-center px-3 h-8 ms-3 text-sm font-medium ${
+                page === totalPage
+                  ? "bg-gray-300 text-gray-500 border border-gray-300 rounded-md px-4 py-2 disabled cursor-not-allowed"
+                  : "flex items-center justify-center px-3 h-8 ms-3 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+              } rounded-lg`}
+              onClick={() => handlePaginate("next")}
+              disabled={page === totalPage}
+            >
+              Next
+            </button>
+          </div>
         </div>
+
+        <ModalAdd
+          isModalAddOpen={isModalAddOpen}
+          closeModalAdd={closeModalAdd}
+          handleAddTodo={handleAddTodo}
+          newTodo={newTodo}
+          handleInputAddChange={handleInputAddChange}
+        />
 
         <Modal
           isModalUpdateOpen={isModalUpdateOpen}

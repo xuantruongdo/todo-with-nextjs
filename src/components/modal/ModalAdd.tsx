@@ -15,7 +15,7 @@ const ModalAdd = (props: IProps) => {
     closeModalAdd,
     handleAddTodo,
     newTodo,
-    handleInputAddChange
+    handleInputAddChange,
   } = props;
 
   const users = useAppSelector((state) => state.userReducer);
@@ -59,39 +59,57 @@ const ModalAdd = (props: IProps) => {
                   <span className="sr-only">Close modal</span>
                 </button>
               </div>
-              <div className="p-4 md:p-5 space-y-4">
-                <input
-                  type="text"
-                  name="name"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  placeholder="New task..."
-                  required
-                  value={newTodo?.name}
-                  onChange={handleInputAddChange}
-                />
+              <div className="p-4">
+                <div className="my-3">
+                  <label htmlFor="name" className="text-slate-400 text-sm">
+                    Task name:
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    placeholder="New task..."
+                    required
+                    value={newTodo?.name}
+                    onChange={handleInputAddChange}
+                  />
+                </div>
 
-                <input
-                  name="date"
-                  type="date"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  placeholder="Select date"
-                  value={newTodo?.date}
-                  onChange={handleInputAddChange}
-                />
+                <div className="my-3">
+                  <label htmlFor="date" className="text-slate-400 text-sm">
+                    Deadline:
+                  </label>
+                  <input
+                    name="date"
+                    type="date"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    placeholder="Select date"
+                    value={newTodo?.date}
+                    onChange={handleInputAddChange}
+                  />
+                </div>
 
-                <select
-                  name="assignment"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  value={newTodo?.assignment}
-                  onChange={handleInputAddChange}
-                >
-                  <option value={""}>Choose</option>
-                  {users?.map((user, index) => (
-                    <option value={user.email} key={index}>
-                      {user.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="my-3">
+                  <label
+                    htmlFor="assignment"
+                    className="text-slate-400 text-sm"
+                  >
+                    Assignment:
+                  </label>
+                  <select
+                    name="assignment"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    value={newTodo?.assignment}
+                    onChange={handleInputAddChange}
+                  >
+                    <option value={""}>Choose</option>
+                    {users?.map((user, index) => (
+                      <option value={user.email} key={index}>
+                        {user.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <div className="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
                 <button

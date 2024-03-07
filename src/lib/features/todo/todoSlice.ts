@@ -8,35 +8,35 @@ const initialState: ITodo[] = [
     name: "Todo 1",
     deadline: "2024-03-09",
     status: "Open",
-    assignment: "Truong 1",
+    assignment: "dev4@gmail.com",
   },
   {
     id: "2",
     name: "Todo 2",
     deadline: "2024-03-09",
     status: "Open",
-    assignment: "Truong 1",
+    assignment: "dev4@gmail.com",
   },
   {
     id: "3",
     name: "Todo 3",
     deadline: "2024-03-12",
     status: "Open",
-    assignment: "Truong 3",
+    assignment: "dev1@gmail.com",
   },
   {
     id: "4",
     name: "Todo 4",
     deadline: "2024-03-09",
     status: "Open",
-    assignment: "Truong 1",
+    assignment: "dev2@gmail.com",
   },
   {
     id: "5",
     name: "Todo 5",
-    deadline: "2024-03-09",
+    deadline: "2024-04-09",
     status: "Open",
-    assignment: "Truong 1",
+    assignment: "dev7@gmail.com",
   },
 ];
 
@@ -52,7 +52,7 @@ export const todo = createSlice({
     doUpdateTodoAction: (state, action) => {
       const id = action.payload.id;
       const updateData = action.payload.updateData;
-      const todoIndex = state.findIndex(todo => todo.id = id)
+      const todoIndex = state.findIndex(todo => todo.id === id)
       if (todoIndex !== -1) {
         state[todoIndex] = { ...state[todoIndex], ...updateData };
       }
