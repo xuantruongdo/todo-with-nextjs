@@ -1,8 +1,9 @@
 "use client";
 
+import { Dispatch, SetStateAction } from 'react';
 interface IProps {
   page: number;
-    setPage: any;
+  setPage: Dispatch<SetStateAction<number>>;
   totalPage: number;
 }
 

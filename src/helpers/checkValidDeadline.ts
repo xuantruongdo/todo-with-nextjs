@@ -1,5 +1,5 @@
-export const checkValidDeadline = (selectDate: Date, currentDate: Date) => {
-  if (selectDate < currentDate && selectDate.getDay() !== currentDate.getDay()) {
+export const checkValidDeadline = (selectedDate: Date, currentDate: Date) => {
+  if (selectedDate < currentDate && selectedDate.getDay() !== currentDate.getDay()) {
     return false;
   }
 

@@ -1,13 +1,10 @@
+import { IAssignee } from "./assignee.interface";
+
 export interface ITodo {
-  id: string;
+  id: number;
   name: string;
   status: string;
-  deadline: string;
-  assignment: string;
-}
-
-export interface INewTodo {
-  name: string;
-  date: string;
-  assignment: string;
+  deadline: Date;
+  assignee: IAssignee;
+  assigneeId: number;
 }

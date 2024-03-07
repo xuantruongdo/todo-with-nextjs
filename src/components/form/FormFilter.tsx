@@ -1,16 +1,16 @@
 "use client";
 
-import { useAppSelector } from "@/lib/hook";
+import { IAssignee } from "@/types/assignee.interface";
 
 interface IProps {
   filter: any;
   handleFilterChange: (e: React.ChangeEvent<any>) => void;
   clearFilter: () => void;
+  assignees: IAssignee[]
 }
 
 const FormFilter = (props: IProps) => {
-  const { filter, handleFilterChange, clearFilter } = props;
-  const users = useAppSelector((state) => state.userReducer);
+  const { filter, handleFilterChange, clearFilter, assignees } = props;
   return (
     <>
       <div className="grid grid-cols-2 gap-4">
@@ -29,20 +29,20 @@ const FormFilter = (props: IProps) => {
           />
         </div>
         <div className="mt-5">
-          <label htmlFor="assignment" className="text-slate-400 text-sm">
-            Assignment:
+          <label htmlFor="assigneeId" className="text-slate-400 text-sm">
+            Assignee:
           </label>
 
           <select
-            name="assignment"
+            name="assigneeId"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            value={filter?.assignment}
+            value={filter?.assigneeId}
             onChange={handleFilterChange}
           >
             <option value={""}>Choose</option>
-            {users?.map((user, index) => (
-              <option value={user.email} key={index}>
-                {user.name}
+            {assignees?.map((assignee) => (
+              <option value={assignee.id} key={assignee.id}>
+                {assignee.name}
               </option>
             ))}
           </select>
