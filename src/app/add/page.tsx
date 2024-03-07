@@ -8,7 +8,6 @@ import { v4 as uuidv4 } from "uuid";
 const AddPage = () => {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
-  //   const todos = useAppSelector((state) => state.todosReducer);
   const dispatch = useAppDispatch();
   const router = useRouter();
 
