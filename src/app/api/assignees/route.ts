@@ -8,7 +8,7 @@ interface IRequest {
   email: string;
 }
 
-export const GET = async (req: NextApiRequest) => {
+export const GET = async (req: any) => {
   try {
     const url = new URL(req.url!);
     const searchParams = new URLSearchParams(url.searchParams);
