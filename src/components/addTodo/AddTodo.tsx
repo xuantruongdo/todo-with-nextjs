@@ -12,9 +12,10 @@ import { IResponse } from "@/types/response.interface";
 
 interface IProps {
   assignees: IAssignee[];
+  fetchTodos: () => void;
 }
 const AddTodo = (props: IProps) => {
-  const { assignees } = props;
+  const { assignees, fetchTodos } = props;
   const router = useRouter();
   const [todoInfo, setTodoInfo] = useState({
     name: "",
@@ -36,7 +37,7 @@ const AddTodo = (props: IProps) => {
         alert("Fill in all information");
         return;
       }
-      
+
       const selectedDate = new Date(todoInfo?.deadline);
       const currentDate = new Date();
 
@@ -53,7 +54,13 @@ const AddTodo = (props: IProps) => {
 
       const res: IResponse<ITodo> = await axios.post("/api/todos", data);
       if (res && res.data) {
+        fetchTodos();
         router.refresh();
+        setTodoInfo({
+          name: "",
+          deadline: "",
+          assigneeId: "",
+        });
       }
     } catch (error) {
       console.error("Error adding todo:", error);

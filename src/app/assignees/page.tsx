@@ -12,7 +12,7 @@ const AssigneePage = () => {
 
   const fetchAssignees = async () => {
     const res = await axios.get("/api/assignees", {
-      params: {page: page}
+      params: {page: page, pageSize: 5}
     });
     if (res && res.data) {
       setAssignees(res.data.assignees);
@@ -31,7 +31,7 @@ const AssigneePage = () => {
       </h2>
       <div className="flex items-center justify-between">
         <Link
-          href={"/todos"}
+          href={"/"}
           className="my-5 focus:outline-none text-gray-900 bg-white border border-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2"
         >
           Home

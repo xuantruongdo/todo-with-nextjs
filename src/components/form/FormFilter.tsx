@@ -1,9 +1,10 @@
 "use client";
 
 import { IAssignee } from "@/types/assignee.interface";
+import { IFilter } from "@/types/filter.interface";
 
 interface IProps {
-  filter: any;
+  filter: IFilter;
   handleFilterChange: (e: React.ChangeEvent<any>) => void;
   clearFilter: () => void;
   assignees: IAssignee[]

@@ -14,7 +14,7 @@ export const GET = async (req: any) => {
     const searchParams = new URLSearchParams(url.searchParams);
 
     const page = parseInt(searchParams.get("page") || "1");
-    const pageSize = parseInt(searchParams.get("pageSize") || "5");
+    const pageSize = parseInt(searchParams.get("pageSize") || "100");
 
     const totalCount = await prisma.assignees.count();
 
@@ -25,6 +25,9 @@ export const GET = async (req: any) => {
         id: true,
         name: true,
         email: true,
+      },
+      orderBy: {
+        id: 'desc'
       },
       take: pageSize,
       skip: (page - 1) * pageSize,

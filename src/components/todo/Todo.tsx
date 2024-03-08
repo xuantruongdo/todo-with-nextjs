@@ -14,9 +14,10 @@ import FormDelete from "../form/FormDelete";
 interface IProps {
   todo: ITodo;
   assignees: IAssignee[];
+  fetchTodos: any;
 }
 const Todo = (props: IProps) => {
-  const { todo, assignees } = props;
+  const { todo, assignees, fetchTodos } = props;
   const [todoInfo, setTodoInfo] = useState<ITodo>(todo);
   const router = useRouter();
 
@@ -55,6 +56,7 @@ const Todo = (props: IProps) => {
     const res = await axios.patch(`/api/todos/${todoInfo?.id}`, updateData);
     if (res && res.data) {
       router.refresh();
+      fetchTodos();
     } else {
       alert("error");
     }
@@ -64,6 +66,7 @@ const Todo = (props: IProps) => {
     const res = await axios.delete(`/api/todos/${id}`);
     if (res && res.data) {
       router.refresh();
+      fetchTodos();
     }
   };
 

@@ -9,90 +9,18 @@ import FormFilter from "../form/FormFilter";
 import { IAssignee } from "@/types/assignee.interface";
 import Todo from "../todo/Todo";
 import Pagination from "../pagination/Pagination";
+import { IFilter } from "@/types/filter.interface";
 
 interface IProps {
   assignees: IAssignee[];
-  todos: any;
+  todos: ITodo[];
+  filter: IFilter;
+  handleFilterChange: (e: React.ChangeEvent<any>) => void;
+  clearFilter: () => void;
+  fetchTodos: () => void;
 }
 const TodoList = (props: IProps) => {
-  const { assignees, todos: todoServer } = props;
-  const [todos, setTodos] = useState<ITodo[]>(todoServer);
-  const [page, setPage] = useState<number>(1);
-  const [totalPage, setTotalPage] = useState<number>(1);
-
-  const [filter, setFilter] = useState({
-    name: "",
-    assigneeId: "",
-    from: "",
-    to: "",
-  });
-
-  const handleFilterChange = (e: React.ChangeEvent<any>) => {
-    const { name, value } = e.target;
-
-    const nextState = produce((draft) => {
-      draft[name] = value;
-    });
-
-    setFilter(nextState);
-  };
-
-  const clearFilter = () => {
-    setFilter({
-      name: "",
-      assigneeId: "",
-      from: "",
-      to: "",
-    });
-  };
-
-  const fetchTodos = async () => {
-    try {
-      const params: any = {
-        page: page
-      };
-
-      if (filter.name !== "") {
-        params.name = filter.name;
-      }
-
-      if (filter.assigneeId !== "") {
-        params.assigneeId = filter.assigneeId;
-      }
-
-      if (filter.assigneeId !== "") {
-        params.assigneeId = filter.assigneeId;
-      }
-
-      if (filter.from !== "") {
-        params.from = filter.from;
-      }
-
-      if (filter.to !== "") {
-        params.to = filter.to;
-      }
-
-      const res: any = await axios.get("/api/todos", {
-        params: params,
-      });
-      if (res && res.data) {
-        setTodos(res.data.todos);
-        setTotalPage(res.data.totalPages)
-      }
-    } catch (error) {
-      console.error("Error fetching todos:", error);
-    }
-  };
-
-  useEffect(() => {
-    setTodos(todoServer);
-  }, [todoServer]);
-
-  useEffect(() => {
-    fetchTodos();
-  }, [filter, page]);
-
-  console.log(page);
+  const { assignees, todos, filter, handleFilterChange, clearFilter, fetchTodos } = props;
 
   return (
     <>
@@ -128,13 +56,10 @@ const TodoList = (props: IProps) => {
           </thead>
           <tbody>
             {todos?.map((todo: ITodo) => (
-              <Todo key={todo?.id} todo={todo} assignees={assignees} />
+              <Todo key={todo?.id} todo={todo} assignees={assignees} fetchTodos={fetchTodos} />
             ))}
-
           </tbody>
         </table>
-        <Pagination page={page} setPage={setPage} totalPage={totalPage}/>
-
       </div>
     </>
   );

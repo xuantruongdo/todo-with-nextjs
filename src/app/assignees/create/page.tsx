@@ -14,9 +14,8 @@ const CreateAssigneePage = () => {
       name: name,
       email: email,
     });
-    console.log(res);
     if (res && res.data) {
-      router.refresh()
+      router.refresh();
       router.push("/assignees");
       setName("");
       setEmail("");
