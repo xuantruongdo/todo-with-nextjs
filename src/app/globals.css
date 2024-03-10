@@ -8,12 +8,14 @@
   box-sizing: border-box;
 }
 
-.Open{
-  color: blue;
+.Open {
+  color: #3498db;
 }
-.InProcess{
-  color: orange;
+
+.InProcess {
+  color: #e67e22;
 }
-.Done{
-  color: green;
+
+.Done {
+  color: #2ecc71;
 }

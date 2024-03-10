@@ -13,18 +13,36 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model assignees {
-  id        Int       @id @default(autoincrement())
-  name      String
-  email     String
-  todos     todos[]
+model users {
+  id       Int     @id @default(autoincrement())
+  fullName String  @map("full_name")
+  email    String  @unique
+  password String
+  tasks    tasks[]
 }
 
-model todos {
-  id          Int      @id @default(autoincrement())
-  name        String
-  status      String
-  deadline    DateTime 
-  assignee     assignees    @relation(fields: [assigneeId], references: [id])
-  assigneeId   Int @map("assignee_id")
+model checklists {
+  id      Int     @id @default(autoincrement())
+  title   String
+  checked Boolean
+  task    tasks   @relation(fields: [taskId], references: [id])
+  taskId  Int     @map("task_id")
+}
+
+model tasks {
+  id         Int          @id @default(autoincrement())
+  name       String
+  status     String
+  deadline   DateTime
+  user       users        @relation(fields: [userId], references: [id])
+  userId     Int          @map("user_id")
+  project    projects     @relation(fields: [projectId], references: [id])
+  projectId  Int          @map("project_id")
+  checklists checklists[]
+}
+
+model projects {
+  id    Int     @id @default(autoincrement())
+  name  String
+  tasks tasks[]
 }
