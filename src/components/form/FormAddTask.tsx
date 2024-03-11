@@ -2,7 +2,9 @@
 
 import { IUser } from "@/types/user.interface";
 import axios from "axios";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import Select from "react-select";
 
 interface IProps {
   projectId: number;
@@ -11,10 +13,11 @@ interface IProps {
 }
 const FormAddTask = (props: IProps) => {
   const { projectId, fetchProjectById, closeModal } = props;
-
+  const { data: session } = useSession();
   const [taskName, setTaskName] = useState<string>("");
   const [deadline, setDeadline] = useState<string>("");
-  const [assigneeId, setAssigneeId] = useState("");
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [users, setUsers] = useState<IUser[]>([]);
 
@@ -34,18 +37,28 @@ const FormAddTask = (props: IProps) => {
     const data = {
       name: taskName,
       deadline: new Date(deadline),
-      userId: Number(assigneeId),
-      projectId: projectId
+      assigneeIds: selectedIds,
+      projectId: projectId,
+      createdId: session?.user.id,
     };
+
+    setIsLoading(true);
     const res = await axios.post("/api/tasks", data);
+    setIsLoading(false);
+
     if (res && res.data) {
       fetchProjectById();
       setTaskName("");
       setDeadline("");
-      setAssigneeId("");
+      setSelectedIds([]);
       closeModal();
     }
   };
+
+  const handleChange = (value: any) => {
+    setSelectedIds(value.map((option: any) => Number(option.value)));
+  };
+
   return (
     <div className="flex items-center justify-center flex-col">
       <h2 className="text-xl font-bold mb-4 text-gray-800 text-center">
@@ -95,32 +108,37 @@ const FormAddTask = (props: IProps) => {
           >
             Assign to User
           </label>
-          <select
-            id="user"
-            className="w-full p-2 border rounded-md"
-            value={assigneeId}
-            onChange={(e) => setAssigneeId(e.target.value)}
-            required
-          >
-            <option value="" disabled>
-              Choose a assignee
-            </option>
-            {users?.map((user: IUser) => (
-              <option key={user.id} value={user.id}>
-                {user.fullName}
-              </option>
-            ))}
-          </select>
+          <Select
+            isMulti
+            onChange={handleChange}
+            options={users.map((user) => {
+              return {
+                label: user.fullName,
+                value: user.id,
+              };
+            })}
+          />
         </div>
 
-        <div className="flex items-center justify-center">
-          <button
-            type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"
-          >
-            Create Task
-          </button>
-        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center">
+            <button
+              type="button"
+              className="w-full bg-blue-200 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none opacity-50"
+            >
+              Processing
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center">
+            <button
+              type="submit"
+              className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"
+            >
+              Create Task
+            </button>
+          </div>
+        )}
       </form>
     </div>
   );

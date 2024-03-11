@@ -45,8 +45,6 @@ export const GET = async (req: any) => {
         name: true,
         status: true,
         deadline: true,
-        user: true,
-        userId: true,
       },
       where: where,
       orderBy: {
@@ -70,16 +68,26 @@ export const GET = async (req: any) => {
 export const POST = async (request: Request) => {
   try {
     const body = await request.json();
-
     const task = await prisma.tasks.create({
       data: {
         name: body.name,
         deadline: body.deadline,
         status: "Open",
-        userId: Number(body.userId),
         projectId: Number(body.projectId),
+        createdId: Number(body.createdId),
       },
     });
+
+    const assignmentPromises = body.assigneeIds.map(async (id: any) => {
+      await prisma.assignees.create({
+        data: {
+          taskId: task.id,
+          userId: Number(id),
+        },
+      });
+    });
+  
+    await Promise.all(assignmentPromises);
 
     return NextResponse.json(task, { status: 201 });
   } catch (error) {

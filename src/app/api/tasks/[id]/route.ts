@@ -13,10 +13,29 @@ export const GET = async (
         name: true,
         status: true,
         deadline: true,
-        user: true,
-        userId: true,
         projectId: true,
         checklists: true,
+        assignees: {
+          select: {
+            id: true,
+            user: {
+              select: {
+                id: true,
+                fullName: true,
+                email: true,
+              },
+            },
+          },
+        },
+        createdBy: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+          },
+        },
+        createdId: true,
+        createdAt: true,
       },
       where: {
         id: Number(params.id),
@@ -33,20 +52,34 @@ export const PATCH = async (
   request: Request,
   { params }: { params: { id: string } }
 ) => {
+  const body = await request.json();
+  const taskId = Number(params.id);
+
   try {
-    const body = await request.json();
-    const task = await prisma.tasks.update({
-      where: {
-        id: Number(params.id),
-      },
-      data: {
-        name: body.name,
-        status: body.status,
-        deadline: new Date(body.deadline),
-        userId: Number(body.userId),
-      },
+    await prisma.$transaction([
+      prisma.tasks.update({
+        where: { id: taskId },
+        data: {
+          name: body.name,
+          status: body.status,
+          deadline: new Date(body.deadline),
+        },
+      }),
+      prisma.assignees.deleteMany({
+        where: { taskId },
+      }),
+    ]);
+
+    body.assigneeIds.map(async (id: number) => {
+      await prisma.assignees.create({
+        data: {
+          userId: id,
+          taskId: Number(taskId),
+        },
+      });
     });
-    return NextResponse.json(task, { status: 200 });
+
+    return NextResponse.json({ status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ status: 500, error: "Internal Server Error" });
@@ -65,7 +98,12 @@ export const DELETE = async (
           taskId: taskId,
         },
       }),
-      prisma.tasks.deleteMany({
+      prisma.assignees.deleteMany({
+        where: {
+          taskId: taskId,
+        },
+      }),
+      prisma.tasks.delete({
         where: {
           id: taskId,
         },

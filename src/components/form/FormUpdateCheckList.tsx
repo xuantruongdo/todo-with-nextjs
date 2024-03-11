@@ -11,6 +11,7 @@ const FormUpdateCheckList = (props: IProps) => {
   const { checklist: initialChecklist, fetchTaskById, closeModal } = props;
 
   const [checklist, setChecklist] = useState<ICheckList>(initialChecklist);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -25,7 +26,9 @@ const FormUpdateCheckList = (props: IProps) => {
       title: checklist?.title,
       checked: checklist?.checked,
     };
+    setIsLoading(true);
     const res = await axios.patch(`/api/checklists/${checklist?.id}`, data);
+    setIsLoading(false);
     if (res && res.data) {
       fetchTaskById();
       closeModal();
@@ -67,13 +70,22 @@ const FormUpdateCheckList = (props: IProps) => {
       </div>
 
       <div className="flex space-x-2">
-        <button
-          type="button"
-          className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none focus:ring-offset-2 focus:ring-offset-gray-800"
-          onClick={handleSaveCheckList}
-        >
-          Save
-        </button>
+        {isLoading ? (
+          <button
+            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none focus:ring-offset-2 focus:ring-offset-gray-800 opacity-50"
+            disabled
+          >
+            Processing
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none focus:ring-offset-2 focus:ring-offset-gray-800"
+            onClick={handleSaveCheckList}
+          >
+            Save
+          </button>
+        )}
         <button
           type="button"
           className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none focus:ring-offset-2 focus:ring-offset-gray-800"

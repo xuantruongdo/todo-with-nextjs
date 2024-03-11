@@ -7,9 +7,14 @@ export interface ITask {
   name: string;
   status: string;
   deadline: Date;
-  user: IUser;
-  userId: number;
+  assignees: {
+    id: number;
+    user: IUser;
+  }[];
+  assigneeId: number;
+  createdBy: IUser;
+  createdId: number;
   project: IProject;
   projectId: number;
-  checklists: ICheckList[]
+  checklists: ICheckList[];
 }

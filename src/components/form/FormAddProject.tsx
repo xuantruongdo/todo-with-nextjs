@@ -1,6 +1,7 @@
 "use client";
 
 import axios from "axios";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -11,18 +12,22 @@ interface IProps {
 const FormAddProject = (props: IProps) => {
   const { closeModal, fetchProjects } = props;
   const router = useRouter();
+  const { data: session } = useSession();
   const [projectName, setProjectName] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const data = {
       name: projectName,
+      createdId: session?.user.id,
     };
+    setIsLoading(true);
     const res = await axios.post("/api/projects", data);
-
+    setIsLoading(false);
     if (res && res.data) {
       router.push(`/${res.data.id}`);
-      fetchProjects()
+      fetchProjects();
       router.refresh();
       closeModal();
     }
@@ -53,14 +58,25 @@ const FormAddProject = (props: IProps) => {
           />
         </div>
 
-        <div className="flex items-center justify-center">
-          <button
-            type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"
-          >
-            Create Project
-          </button>
-        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center">
+            <button
+              type="button"
+              className="bg-blue-200 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none opacity-50"
+            >
+              Processing
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center">
+            <button
+              type="submit"
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"
+            >
+              Create Project
+            </button>
+          </div>
+        )}
       </form>
     </div>
   );

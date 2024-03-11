@@ -5,6 +5,7 @@ import axios from "axios";
 import moment from "moment";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import Select from "react-select";
 
 type IProps = {
   params: { id: string };
@@ -12,15 +13,24 @@ type IProps = {
 };
 const UpdateTaskPage = (props: IProps) => {
   const taskId = props.params.id;
-
+  const [selectedIds, setSelectedIds] = useState([]);
   const [task, setTask] = useState<ITask>();
   const [users, setUsers] = useState<IUser[]>();
+  const [defaultAssignees, setDefaultAssignees] = useState<any>([]);
   const router = useRouter();
 
   const fetchTaskById = async () => {
     const res = await axios.get(`/api/tasks/${taskId}`);
     if (res && res.data) {
       setTask(res.data);
+      setDefaultAssignees(
+        res.data?.assignees?.map((u: any) => {
+          return {
+            label: u.user.fullName,
+            value: u.user.id,
+          };
+        })
+      );
     }
   };
 
@@ -39,20 +49,30 @@ const UpdateTaskPage = (props: IProps) => {
     fetchUsers();
   }, []);
 
-  const handleInputChange = (e: any) => {
+  const handleInputChange = (e: React.ChangeEvent<any>) => {
     const { name, value } = e.target;
     setTask((prevData: any) => ({ ...prevData, [name]: value }));
   };
 
-  
+  const handleChange = (value: any) => {
+    setDefaultAssignees(
+      value.map((option: any) => {
+        return {
+          value: Number(option.value),
+          label: option.label,
+        };
+      })
+    );
+    setSelectedIds(value.map((option: any) => Number(option.value)));
+  };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data = {
       name: task?.name,
       status: task?.status,
       deadline: task?.deadline,
-      userId: task?.userId,
+      assigneeIds: selectedIds,
     };
     const res = await axios.patch(`/api/tasks/${taskId}`, data);
     if (res && res.data) {
@@ -132,20 +152,17 @@ const UpdateTaskPage = (props: IProps) => {
               >
                 Assignee:
               </label>
-              <select
-                id="userId"
-                name="userId"
-                className="w-full p-2 border rounded"
-                value={task?.userId}
-                onChange={handleInputChange}
-                required
-              >
-                {users?.map((user: IUser) => (
-                  <option value={user?.id} key={user?.id}>
-                    {user?.fullName}
-                  </option>
-                ))}
-              </select>
+              <Select
+                isMulti
+                onChange={handleChange}
+                options={users?.map((user) => {
+                  return {
+                    label: user.fullName,
+                    value: user.id,
+                  };
+                })}
+                value={defaultAssignees}
+              />
             </div>
           </div>
 

@@ -13,36 +13,59 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model users {
-  id       Int     @id @default(autoincrement())
-  fullName String  @map("full_name")
-  email    String  @unique
-  password String
-  tasks    tasks[]
+model Checklists {
+  id        Int      @id @default(autoincrement())
+  title     String
+  checked   Boolean
+  task      Tasks    @relation(fields: [taskId], references: [id])
+  taskId    Int      @map("task_id")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model checklists {
-  id      Int     @id @default(autoincrement())
-  title   String
-  checked Boolean
-  task    tasks   @relation(fields: [taskId], references: [id])
-  taskId  Int     @map("task_id")
+model Users {
+  id        Int         @id @default(autoincrement())
+  fullName  String      @map("full_name")
+  email     String      @unique
+  password  String
+  tasks     Tasks[]
+  projects  Projects[]
+  assignees Assignees[]
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
 }
 
-model tasks {
+model Assignees {
+  id     Int   @id @default(autoincrement())
+  userId Int   @map("user_id")
+  taskId Int   @map("task_id")
+  user   Users @relation(fields: [userId], references: [id])
+  task   Tasks @relation(fields: [taskId], references: [id])
+
+  @@index([userId, taskId])
+}
+
+model Tasks {
   id         Int          @id @default(autoincrement())
   name       String
   status     String
   deadline   DateTime
-  user       users        @relation(fields: [userId], references: [id])
-  userId     Int          @map("user_id")
-  project    projects     @relation(fields: [projectId], references: [id])
+  createdBy  Users        @relation(fields: [createdId], references: [id])
+  createdId  Int          @map("created_id")
+  project    Projects     @relation(fields: [projectId], references: [id])
   projectId  Int          @map("project_id")
-  checklists checklists[]
+  checklists Checklists[]
+  assignees  Assignees[]
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updatedAt  DateTime     @updatedAt @map("updated_at")
 }
 
-model projects {
-  id    Int     @id @default(autoincrement())
-  name  String
-  tasks tasks[]
+model Projects {
+  id        Int      @id @default(autoincrement())
+  name      String
+  tasks     Tasks[]
+  createdBy Users    @relation(fields: [createdId], references: [id])
+  createdId Int      @map("created_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 }

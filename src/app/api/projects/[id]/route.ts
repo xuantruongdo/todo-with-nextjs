@@ -11,6 +11,14 @@ export const GET = async (
       id: true,
       name: true,
       tasks: true,
+      createdBy: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+        },
+      },
+      createdAt: true,
     },
     where: {
       id: Number(params.id),
@@ -19,13 +27,11 @@ export const GET = async (
   return NextResponse.json(project, { status: 200 });
 };
 
-
 export const DELETE = async (
   request: Request,
   { params }: { params: { id: string } }
 ) => {
   const projectId = Number(params.id);
-
   try {
     await prisma.$transaction([
       prisma.checklists.deleteMany({
@@ -35,9 +41,16 @@ export const DELETE = async (
           },
         },
       }),
+      prisma.assignees.deleteMany({
+        where: {
+          task: {
+            projectId: projectId,
+          },
+        },
+      }),
       prisma.tasks.deleteMany({
         where: {
-            projectId: projectId,
+          projectId: projectId,
         },
       }),
       prisma.projects.delete({
@@ -49,9 +62,7 @@ export const DELETE = async (
 
     return NextResponse.json({ status: 200 });
   } catch (error) {
-    console.error('Error deleting project and associated data:', error);
-    return NextResponse.json({ status: 500, error: 'Internal Server Error' });
-  } finally {
-    await prisma.$disconnect();
+    console.error(error);
+    return NextResponse.json({ status: 500, error: "Internal Server Error" });
   }
 };

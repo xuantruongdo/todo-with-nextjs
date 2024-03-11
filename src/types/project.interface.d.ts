@@ -1,7 +1,10 @@
 import { ITask } from "./task.interface";
+import { IUser } from "./user.interface";
 
 export interface IProject {
     id: number;
     name: string;
-    tasks: ITask[]
+    tasks: ITask[],
+    createdBy: IUser;
+    createdAt: Date
 }

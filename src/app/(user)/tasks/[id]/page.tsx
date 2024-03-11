@@ -21,6 +21,7 @@ const DetailTaskPage = (props: IProps) => {
   const [task, setTask] = useState<ITask>();
   const [checklist, setChecklist] = useState<ICheckList>();
   const [title, setTitle] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchTaskById = async () => {
     const res = await axios.get(`/api/tasks/${taskId}`);
@@ -38,7 +39,9 @@ const DetailTaskPage = (props: IProps) => {
       title: title,
       taskId: Number(taskId),
     };
+    setIsLoading(true);
     const res = await axios.post("/api/checklists", data);
+    setIsLoading(false);
     if (res && res.data) {
       fetchTaskById();
       setTitle("");
@@ -83,7 +86,16 @@ const DetailTaskPage = (props: IProps) => {
           </div>
           <div className="mb-4">
             <div className="text-gray-700 font-bold mb-2">Asignee:</div>
-            <div className="text-gray-800">{task?.user.fullName}</div>
+            {task?.assignees.map((assignee) => (
+              <div className="text-gray-800" key={assignee?.id}>
+                {assignee?.user.fullName}
+              </div>
+            ))}
+          </div>
+
+          <div className="mb-4">
+            <div className="text-gray-700 font-bold mb-2">Created by:</div>
+            <div className="text-gray-800">{task?.createdBy.fullName}</div>
           </div>
 
           <div className="mb-4">
@@ -104,16 +116,15 @@ const DetailTaskPage = (props: IProps) => {
               </button>
             </div>
             {task?.checklists.map((checklist: ICheckList) => (
-              <div
-                key={checklist?.id}
-                className="flex items-center mb-2"
-                onClick={() => {
-                  openModal();
-                  setChecklist(checklist);
-                }}
-              >
+              <div key={checklist?.id} className="flex items-center mb-2">
                 <div className="mr-2">{checklist.checked ? "✔" : "○"}</div>
-                <p className="text-gray-800 hover:text-blue-500 cursor-pointer">
+                <p
+                  className="text-gray-800 hover:text-blue-500 cursor-pointer"
+                  onClick={() => {
+                    openModal();
+                    setChecklist(checklist);
+                  }}
+                >
                   {checklist.title}
                 </p>
               </div>

@@ -21,6 +21,7 @@ export const POST = async (request: Request) => {
     const project = await prisma.projects.create({
       data: {
         name: body.name,
+        createdId: Number(body.createdId)
       },
     });
     return NextResponse.json(project, { status: 201 });
