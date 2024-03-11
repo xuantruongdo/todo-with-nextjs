@@ -13,6 +13,7 @@ const SignUp = () => {
     password: "",
     confirmPassword: "",
   });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -29,7 +30,9 @@ const SignUp = () => {
         email: formData.email,
         password: formData.password,
       };
+      setIsLoading(true);
       const res = await axios.post("/api/users/register", data);
+      setIsLoading(false);
       if (res && res.data) {
         router.push("/auth/signIn");
       }
@@ -109,12 +112,22 @@ const SignUp = () => {
               required
             />
           </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none"
-          >
-            Sign Up
-          </button>
+
+          {isLoading ? (
+            <button
+              type="button"
+              className="w-full bg-blue-200 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none opacity-50"
+            >
+              Processing
+            </button>
+          ) : (
+            <button
+              type="submit"
+              className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none"
+            >
+              Sign Up
+            </button>
+          )}
         </form>
       </div>
     </div>

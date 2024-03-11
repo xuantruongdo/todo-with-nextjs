@@ -11,6 +11,7 @@ const SignInPage = () => {
     email: "",
     password: "",
   });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -21,11 +22,13 @@ const SignInPage = () => {
 
   const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading(true);
     const res = await signIn("credentials", {
       username: formData.email,
       password: formData.password,
       redirect: false,
     });
+    setIsLoading(false);
 
     if (res && !res.error) {
       router.push("/");
@@ -76,12 +79,21 @@ const SignInPage = () => {
           <Link href={"/auth/signUp"}>
             <p className="text-center text-sm">Do not have an account?</p>
           </Link>
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none mt-3"
-          >
-            Sign In
-          </button>
+          {isLoading ? (
+            <button
+              type="button"
+              className="w-full bg-blue-200 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none opacity-50"
+            >
+              Processing
+            </button>
+          ) : (
+            <button
+              type="submit"
+              className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none mt-3"
+            >
+              Sign In
+            </button>
+          )}
         </form>
       </div>
     </div>
