@@ -18,3 +18,15 @@ export interface ITask {
   projectId: number;
   checklists: ICheckList[];
 }
+
+export interface ICreateTask {
+  name: string;
+  deadline: Date;
+  projectId: number;
+  assigneeIds: number[];
+}
+
+
+export interface IUpdateTask extends ICreateTask {
+  status: string;
+}

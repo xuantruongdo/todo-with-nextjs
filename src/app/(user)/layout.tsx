@@ -25,7 +25,7 @@ export default async function RootLayout({
         <Header />
         <div className="flex">
           <Sidebar />
-          <div style={{ marginLeft: 255, width: "calc(100vw - 255px)" }}>
+          <div style={{ marginLeft: 255, width: "calc(100vw - 280px)" }}>
             {children}
           </div>
         </div>

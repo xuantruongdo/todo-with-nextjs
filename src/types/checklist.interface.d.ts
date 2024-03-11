@@ -7,3 +7,14 @@ export interface ICheckList {
     task: ITask;
     taskId: number;
 }
+
+export interface ICreateCheckList {
+    title: string;
+    taskId: number;
+}
+
+
+export interface IUpdateCheckList {
+    title: string;
+    checked: boolean;
+}

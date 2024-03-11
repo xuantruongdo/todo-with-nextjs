@@ -1,19 +1,19 @@
 "use client";
 
+import { IResponse } from "@/types/response.interface";
+import { ICreateTask, ITask } from "@/types/task.interface";
 import { IUser } from "@/types/user.interface";
 import axios from "axios";
-import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Select from "react-select";
 
 interface IProps {
   projectId: number;
-  fetchProjectById: () => void;
+  fetchTasksByProjectId: () => void;
   closeModal: () => void;
 }
 const FormAddTask = (props: IProps) => {
-  const { projectId, fetchProjectById, closeModal } = props;
-  const { data: session } = useSession();
+  const { projectId, fetchTasksByProjectId, closeModal } = props;
   const [taskName, setTaskName] = useState<string>("");
   const [deadline, setDeadline] = useState<string>("");
   const [selectedIds, setSelectedIds] = useState([]);
@@ -22,7 +22,7 @@ const FormAddTask = (props: IProps) => {
   const [users, setUsers] = useState<IUser[]>([]);
 
   const fetchUsers = async () => {
-    const res = await axios.get(`/api/users`);
+    const res: IResponse<IUser[]> = await axios.get(`/api/users`);
     if (res && res.data) {
       setUsers(res.data);
     }
@@ -34,20 +34,19 @@ const FormAddTask = (props: IProps) => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    const data = {
+    const data: ICreateTask = {
       name: taskName,
       deadline: new Date(deadline),
       assigneeIds: selectedIds,
       projectId: projectId,
-      createdId: session?.user.id,
     };
 
     setIsLoading(true);
-    const res = await axios.post("/api/tasks", data);
+    const res: IResponse<ITask> = await axios.post("/api/tasks", data);
     setIsLoading(false);
 
     if (res && res.data) {
-      fetchProjectById();
+      fetchTasksByProjectId();
       setTaskName("");
       setDeadline("");
       setSelectedIds([]);

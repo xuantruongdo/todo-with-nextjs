@@ -8,6 +8,7 @@ import FormDeleteProject from "../form/FormDeleteProject";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import Modal from "../modal/Modal";
+import { IResponse } from "@/types/response.interface";
 
 interface IProps {
   project: IProject;
@@ -18,7 +19,7 @@ const ProjectItem = (props: IProps) => {
   const { isOpen, openModal, closeModal } = useModal();
   const router = useRouter();
   const handleDeleteProject = async () => {
-    const res = await axios.delete(`/api/projects/${project?.id}`);
+    const res: IResponse<any> = await axios.delete(`/api/projects/${project?.id}`);
     if (res) {
       fetchProjects();
       router.push("/");

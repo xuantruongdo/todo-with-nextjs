@@ -1,5 +1,6 @@
 "use client";
-import { ITask } from "@/types/task.interface";
+import { IResponse } from "@/types/response.interface";
+import { ITask, IUpdateTask } from "@/types/task.interface";
 import { IUser } from "@/types/user.interface";
 import axios from "axios";
 import moment from "moment";
@@ -20,7 +21,7 @@ const UpdateTaskPage = (props: IProps) => {
   const router = useRouter();
 
   const fetchTaskById = async () => {
-    const res = await axios.get(`/api/tasks/${taskId}`);
+    const res: IResponse<any> = await axios.get(`/api/tasks/${taskId}`);
     if (res && res.data) {
       setTask(res.data);
       setDefaultAssignees(
@@ -31,11 +32,15 @@ const UpdateTaskPage = (props: IProps) => {
           };
         })
       );
+
+      setSelectedIds(
+        res.data?.assignees?.map((u: any) => u?.user.id)
+      );
     }
   };
 
   const fetchUsers = async () => {
-    const res = await axios.get(`/api/users`);
+    const res: IResponse<IUser[]> = await axios.get(`/api/users`);
     if (res && res.data) {
       setUsers(res.data);
     }
@@ -68,7 +73,7 @@ const UpdateTaskPage = (props: IProps) => {
 
   const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data = {
+    const data: IUpdateTask | any = {
       name: task?.name,
       status: task?.status,
       deadline: task?.deadline,

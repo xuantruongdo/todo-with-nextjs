@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest } from "next";
 import { getHashPassword } from "@/helpers/hashPassword";
+import { IRegister } from "@/types/auth.interface";
 const prisma = new PrismaClient();
 
 export const GET = async (req: NextApiRequest) => {
@@ -40,7 +41,7 @@ export const GET = async (req: NextApiRequest) => {
 
 export const POST = async (request: Request) => {
   try {
-    const body = await request.json();
+    const body: IRegister = await request.json();
 
     const existUser = await prisma.users.findUnique({
       where: {

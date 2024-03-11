@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest } from "next";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
+import { ICreateTask } from "@/types/task.interface";
 
 const prisma = new PrismaClient();
 
-export const GET = async (req: any) => {
+export const GET = async (req: Request) => {
   const url = new URL(req.url!);
   const searchParams = new URLSearchParams(url.searchParams);
 
@@ -67,27 +70,24 @@ export const GET = async (req: any) => {
 
 export const POST = async (request: Request) => {
   try {
-    const body = await request.json();
+    const session = await getServerSession(authOptions);
+    const body: ICreateTask = await request.json();
     const task = await prisma.tasks.create({
       data: {
         name: body.name,
         deadline: body.deadline,
         status: "Open",
         projectId: Number(body.projectId),
-        createdId: Number(body.createdId),
+        createdId: Number(session?.user.id),
+        assignees: {
+          createMany: {
+            data: body.assigneeIds.map((id: number) => ({
+              userId: id
+            }))
+          }
+        },
       },
     });
-
-    const assignmentPromises = body.assigneeIds.map(async (id: any) => {
-      await prisma.assignees.create({
-        data: {
-          taskId: task.id,
-          userId: Number(id),
-        },
-      });
-    });
-  
-    await Promise.all(assignmentPromises);
 
     return NextResponse.json(task, { status: 201 });
   } catch (error) {

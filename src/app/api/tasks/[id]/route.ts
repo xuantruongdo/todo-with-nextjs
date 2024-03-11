@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { IUpdateTask } from "@/types/task.interface";
 const prisma = new PrismaClient();
 
 export const GET = async (
@@ -52,7 +53,7 @@ export const PATCH = async (
   request: Request,
   { params }: { params: { id: string } }
 ) => {
-  const body = await request.json();
+  const body: IUpdateTask = await request.json();
   const taskId = Number(params.id);
 
   try {
@@ -68,16 +69,14 @@ export const PATCH = async (
       prisma.assignees.deleteMany({
         where: { taskId },
       }),
-    ]);
 
-    body.assigneeIds.map(async (id: number) => {
-      await prisma.assignees.create({
-        data: {
+      prisma.assignees.createMany({
+        data: body.assigneeIds.map((id: number) => ({
           userId: id,
           taskId: Number(taskId),
-        },
-      });
-    });
+        })),
+      }),
+    ]);
 
     return NextResponse.json({ status: 200 });
   } catch (error) {

@@ -1,4 +1,5 @@
-import { ICheckList } from "@/types/checklist.interface";
+import { ICheckList, IUpdateCheckList } from "@/types/checklist.interface";
+import { IResponse } from "@/types/response.interface";
 import axios from "axios";
 import React, { useState } from "react";
 
@@ -22,12 +23,12 @@ const FormUpdateCheckList = (props: IProps) => {
   };
 
   const handleSaveCheckList = async () => {
-    const data = {
+    const data: IUpdateCheckList = {
       title: checklist?.title,
       checked: checklist?.checked,
     };
     setIsLoading(true);
-    const res = await axios.patch(`/api/checklists/${checklist?.id}`, data);
+    const res: IResponse<ICheckList> = await axios.patch(`/api/checklists/${checklist?.id}`, data);
     setIsLoading(false);
     if (res && res.data) {
       fetchTaskById();
@@ -36,7 +37,7 @@ const FormUpdateCheckList = (props: IProps) => {
   };
 
   const handleDeleteCheckList = async () => {
-    const res = await axios.delete(`/api/checklists/${checklist?.id}`);
+    const res: IResponse<any> = await axios.delete(`/api/checklists/${checklist?.id}`);
     if (res && res.data) {
       fetchTaskById();
       closeModal();

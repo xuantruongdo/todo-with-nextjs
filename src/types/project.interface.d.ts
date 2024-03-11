@@ -8,3 +8,7 @@ export interface IProject {
     createdBy: IUser;
     createdAt: Date
 }
+
+export interface ICreateProject{
+    name: string;
+}

@@ -1,7 +1,8 @@
 "use client";
 
+import { IProject } from "@/types/project.interface";
+import { IResponse } from "@/types/response.interface";
 import axios from "axios";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -12,7 +13,6 @@ interface IProps {
 const FormAddProject = (props: IProps) => {
   const { closeModal, fetchProjects } = props;
   const router = useRouter();
-  const { data: session } = useSession();
   const [projectName, setProjectName] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -20,10 +20,9 @@ const FormAddProject = (props: IProps) => {
     e.preventDefault();
     const data = {
       name: projectName,
-      createdId: session?.user.id,
     };
     setIsLoading(true);
-    const res = await axios.post("/api/projects", data);
+    const res: IResponse<IProject> = await axios.post("/api/projects", data);
     setIsLoading(false);
     if (res && res.data) {
       router.push(`/${res.data.id}`);

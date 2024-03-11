@@ -1,5 +1,6 @@
 "use client";
 
+import { IRegister } from "@/types/auth.interface";
 import axios from "axios";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -25,7 +26,7 @@ const SignUp = () => {
   const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (formData.password === formData.confirmPassword) {
-      const data = {
+      const data: IRegister = {
         fullName: formData.fullName,
         email: formData.email,
         password: formData.password,

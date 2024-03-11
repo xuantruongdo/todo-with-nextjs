@@ -2,8 +2,10 @@
 
 import FormUpdateCheckList from "@/components/form/FormUpdateCheckList";
 import Modal from "@/components/modal/Modal";
+import TaskSkeleton from "@/components/skeleton/TaskSkeleton";
 import useModal from "@/hooks/useModal";
-import { ICheckList } from "@/types/checklist.interface";
+import { ICheckList, ICreateCheckList } from "@/types/checklist.interface";
+import { IResponse } from "@/types/response.interface";
 import { ITask } from "@/types/task.interface";
 import axios from "axios";
 import moment from "moment";
@@ -24,7 +26,9 @@ const DetailTaskPage = (props: IProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchTaskById = async () => {
-    const res = await axios.get(`/api/tasks/${taskId}`);
+    setIsLoading(true);
+    const res: IResponse<ITask> = await axios.get(`/api/tasks/${taskId}`);
+    setIsLoading(false);
     if (res && res.data) {
       setTask(res.data);
     }
@@ -35,18 +39,20 @@ const DetailTaskPage = (props: IProps) => {
   }, [taskId]);
 
   const handleAddCheckList = async () => {
-    const data = {
+    const data: ICreateCheckList = {
       title: title,
       taskId: Number(taskId),
     };
-    setIsLoading(true);
-    const res = await axios.post("/api/checklists", data);
-    setIsLoading(false);
+    
+    const res: IResponse<ICheckList> = await axios.post("/api/checklists", data);
+    
     if (res && res.data) {
       fetchTaskById();
       setTitle("");
     }
   };
+
+  if(isLoading) return <TaskSkeleton/>
 
   return (
     <div className="mx-auto sm:px-10 md:px-8 lg:px-14 xl:px-20 mt-40">

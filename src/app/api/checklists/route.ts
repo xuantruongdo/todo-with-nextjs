@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest } from "next";
+import { ICreateCheckList } from "@/types/checklist.interface";
 const prisma = new PrismaClient();
 
 export const POST = async (request: Request) => {
   try {
-    const body = await request.json();
+    const body: ICreateCheckList = await request.json();
     const checklist = await prisma.checklists.create({
       data: {
         title: body.title,

@@ -2,12 +2,13 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { checkValidPassword } from "@/helpers/checkValidPassword";
 import jwt from "jsonwebtoken";
+import { ILogin } from "@/types/auth.interface";
 
 const prisma = new PrismaClient();
 
 export const POST = async (request: Request) => {
   try {
-    const body = await request.json();
+    const body: ILogin = await request.json();
     const { username, password } = body;
     const user = await prisma.users.findUnique({
       where: {
