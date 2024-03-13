@@ -42,10 +42,14 @@ export const GET = async (
         id: Number(params.id),
       },
     });
+    
+    if (!task) {
+      return NextResponse.json({ message: 'Task ID does not exist' }, { status: 400 }); 
+    }
     return NextResponse.json(task, { status: 200 });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ status: 500, error: "Internal Server Error" });
+    return NextResponse.json({ status: 500, message: "Error when fetching task by ID" });
   }
 };
 
@@ -81,7 +85,7 @@ export const PATCH = async (
     return NextResponse.json({ status: 200 });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ status: 500, error: "Internal Server Error" });
+    return NextResponse.json({ status: 500, error: "Error when updating task" });
   }
 };
 
@@ -112,8 +116,6 @@ export const DELETE = async (
     return NextResponse.json({ status: 200 });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ status: 500, error: "Internal Server Error" });
-  } finally {
-    await prisma.$disconnect();
+    return NextResponse.json({ status: 500, error: "Error when deleting task" });
   }
 };

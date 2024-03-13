@@ -19,6 +19,11 @@ export interface ITask {
   checklists: ICheckList[];
 }
 
+export interface IResponseTask {
+  tasks: ITask[];
+  totalPages: number;
+}
+
 export interface ICreateTask {
   name: string;
   deadline: Date;

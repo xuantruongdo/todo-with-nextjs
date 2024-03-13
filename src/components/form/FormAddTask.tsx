@@ -1,11 +1,11 @@
 "use client";
 
-import { IResponse } from "@/types/response.interface";
 import { ICreateTask, ITask } from "@/types/task.interface";
 import { IUser } from "@/types/user.interface";
 import { useEffect, useState } from "react";
 import Select from "react-select";
 import axios from "@/config/axios-customize";
+import { notifyError, notifySuccess } from "@/lib/notify";
 
 interface IProps {
   projectId: number;
@@ -23,10 +23,8 @@ const FormAddTask = (props: IProps) => {
 
   const fetchUsers = async () => {
     try {
-      const res: IResponse<IUser[]> = await axios.get(`/api/users`);
-      if (res && res.data) {
-        setUsers(res.data);
-      }
+      const { data } = await axios.get<IUser[]>("/api/users");
+      setUsers(data);
     } catch (err) {
       console.log(err);
     }
@@ -38,7 +36,7 @@ const FormAddTask = (props: IProps) => {
 
   const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data: ICreateTask = {
+    const taskData: ICreateTask = {
       name: taskName,
       deadline: new Date(deadline),
       assigneeIds: selectedIds,
@@ -47,16 +45,15 @@ const FormAddTask = (props: IProps) => {
 
     setIsLoading(true);
     try {
-      const res: IResponse<ITask> = await axios.post("/api/tasks", data);
-      if (res && res.data) {
-        setTasks((prevTasks: ITask[]) => [res.data, ...prevTasks]);
-        setTaskName("");
-        setDeadline("");
-        setSelectedIds([]);
-        closeModal();
-      }
+      const { data } = await axios.post<ITask>("/api/tasks", taskData);
+      setTasks((prevTasks: ITask[]) => [data, ...prevTasks]);
+      setTaskName("");
+      setDeadline("");
+      setSelectedIds([]);
+      closeModal();
+      notifySuccess("Created task successfully");
     } catch (err) {
-      console.log(err);
+      notifyError(err as string);
     } finally {
       setIsLoading(false);
     }

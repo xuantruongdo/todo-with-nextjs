@@ -18,7 +18,7 @@ export const POST = async (request: Request) => {
     return NextResponse.json(checklist, { status: 201 });
   } catch (error) {
     return NextResponse.json(
-      { message: "Internal Server Error" },
+      { message: "Error when creating checklist" },
       { status: 500 }
     );
   }

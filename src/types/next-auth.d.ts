@@ -13,3 +13,12 @@ declare module "next-auth/jwt" {
     access_token: string;
   }
 }
+
+export interface IResponseLogin{
+  access_token: string;
+  user: {
+    id: number;
+    fullName: string;
+    email: string;
+  }
+}

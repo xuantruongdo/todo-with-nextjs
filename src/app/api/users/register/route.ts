@@ -42,18 +42,13 @@ export const GET = async (req: NextApiRequest) => {
 export const POST = async (request: Request) => {
   try {
     const body: IRegister = await request.json();
-
     const existUser = await prisma.users.findUnique({
       where: {
         email: body.email,
       },
     });
-
     if (existUser) {
-      return NextResponse.json(
-        { message: "Email already exists" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: 'Email already exists' }, { status: 400 }); 
     }
 
     const user = await prisma.users.create({

@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
+type Filter = {
+  name?: Object;
+  status?: Object;
+  deadline?: Object;
+}
 export const GET = async (
   request: Request,
   { params }: { params: { id: string } }
@@ -15,13 +20,11 @@ export const GET = async (
     const status = searchParams.get("status");
     const from = searchParams.get("from");
     const to = searchParams.get("to");
-
-    const where: any = {};
+    const where: Filter = {};
 
     if (name) {
       where.name = { contains: name };
     }
-
     if (status) {
       where.status = { equals: status };
     }
@@ -81,7 +84,7 @@ export const GET = async (
       take: pageSize,
       skip: (page - 1) * pageSize,
     });
-    return NextResponse.json({ tasks, totalPages }, { status: 200 });
+    return NextResponse.json({ tasks, totalPages, message: "Oke" }, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ status: 500, error: "Internal Server Error" });

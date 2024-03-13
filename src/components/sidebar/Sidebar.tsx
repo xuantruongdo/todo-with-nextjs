@@ -5,7 +5,6 @@ import { IProject } from "@/types/project.interface";
 import axios from "@/config/axios-customize";
 import ProjectItem from "../projectItem/ProjectItem";
 import { useEffect, useState } from "react";
-import { IResponse } from "@/types/response.interface";
 import FormAddProject from "../form/FormAddProject";
 import Modal from "../modal/Modal";
 
@@ -14,10 +13,8 @@ const Sidebar = () => {
   const { isOpen, openModal, closeModal } = useModal();
   const fetchProjects = async () => {
     try {
-      const res: IResponse<IProject[]> = await axios.get(`/api/projects`);
-      if (res && res.data) {
-        setProjects(res.data);
-      }
+      const { data } = await axios.get<IProject[]>(`/api/projects`);
+      setProjects(data);
     } catch (err) {
       console.log(err);
     }

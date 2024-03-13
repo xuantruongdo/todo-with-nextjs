@@ -1,5 +1,6 @@
 "use client";
 
+import { notifyError } from "@/lib/notify";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -29,11 +30,10 @@ const SignInPage = () => {
       redirect: false,
     });
     setIsLoading(false);
-
-    if (res && !res.error) {
+    if (res?.ok) {
       router.push("/");
     } else {
-      console.log(res?.error!);
+      notifyError(res?.error as string);
     }
   };
 

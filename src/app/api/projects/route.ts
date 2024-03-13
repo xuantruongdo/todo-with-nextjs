@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest } from "next";
 import { getServerSession } from "next-auth";
@@ -31,7 +31,7 @@ export const POST = async (request: Request) => {
     return NextResponse.json(project, { status: 201 });
   } catch (error) {
     return NextResponse.json(
-      { message: "Internal Server Error" },
+      { message: "Error when creating project" },
       { status: 500 }
     );
   }

@@ -1,6 +1,7 @@
+import { notifyError, notifySuccess } from "@/lib/notify";
 import { ICheckList, IUpdateCheckList } from "@/types/checklist.interface";
-import { IResponse } from "@/types/response.interface";
-import axios from "axios";
+import { IResponseDelete } from "@/types/response.interface";
+import axios from "@/config/axios-customize";
 import React, { useState } from "react";
 
 interface IProps {
@@ -23,22 +24,22 @@ const FormUpdateCheckList = (props: IProps) => {
   };
 
   const handleSaveCheckList = async () => {
-    const data: IUpdateCheckList = {
+    const checklistData: IUpdateCheckList = {
       title: checklist?.title,
       checked: checklist?.checked,
     };
     setIsLoading(true);
     try {
-      const res: IResponse<ICheckList> = await axios.patch(
+      const { data } = await axios.patch<ICheckList>(
         `/api/checklists/${checklist?.id}`,
-        data
+        checklistData
       );
-      if (res && res.data) {
-        fetchTaskById();
-        closeModal();
-      }
+      fetchTaskById();
+      closeModal();
+      notifySuccess("Updated checklist successfully")
     } catch (err) {
       console.log(err);
+      notifyError(err as string)
     } finally {
       setIsLoading(false);
     }
@@ -46,15 +47,15 @@ const FormUpdateCheckList = (props: IProps) => {
 
   const handleDeleteCheckList = async () => {
     try {
-      const res: IResponse<any> = await axios.delete(
+      const { data } = await axios.delete<IResponseDelete>(
         `/api/checklists/${checklist?.id}`
       );
-      if (res && res.data) {
-        fetchTaskById();
-        closeModal();
-      }
+      fetchTaskById();
+      closeModal();
+      notifySuccess("Deleted checklist successfully");
     } catch (err) {
       console.log(err);
+      notifyError(err as string)
     }
   };
 

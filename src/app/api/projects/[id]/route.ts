@@ -6,6 +6,7 @@ export const GET = async (
   request: Request,
   { params }: { params: { id: string } }
 ) => {
+  
   const project = await prisma.projects.findUnique({
     select: {
       id: true,
@@ -24,6 +25,11 @@ export const GET = async (
       id: Number(params.id),
     },
   });
+
+  if (!project) {
+    return NextResponse.json({ message: 'Project not found' }, { status: 404 });
+  }
+  
   return NextResponse.json(project, { status: 200 });
 };
 
@@ -63,6 +69,6 @@ export const DELETE = async (
     return NextResponse.json({ status: 200 });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ status: 500, error: "Internal Server Error" });
+    return NextResponse.json({ status: 500, error: "Error when deleting project" });
   }
 };

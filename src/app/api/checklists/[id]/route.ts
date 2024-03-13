@@ -19,8 +19,7 @@ export const PATCH = async (
     });
     return NextResponse.json(checklist, { status: 200 });
   } catch (error) {
-    console.error("Error deleting project and associated data:", error);
-    return NextResponse.json({ status: 500, error: "Internal Server Error" });
+    return NextResponse.json({ status: 500, error: "Error when updating checklist" });
   }
 };
 
@@ -36,7 +35,6 @@ export const DELETE = async (
     });
     return NextResponse.json(checklist, { status: 200 });
   } catch (error) {
-    console.error("Error deleting project and associated data:", error);
-    return NextResponse.json({ status: 500, error: "Internal Server Error" });
+    return NextResponse.json({ status: 500, error: "Error when deleting checklist" });
   }
 };

@@ -1,9 +1,10 @@
 "use client";
 
-import { IResponse } from "@/types/response.interface";
+import { IResponseDelete } from "@/types/response.interface";
 import axios from "@/config/axios-customize";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { notifyError, notifySuccess } from "@/lib/notify";
 
 type IProps = {
   params: { id: string };
@@ -16,13 +17,13 @@ const DeleteTaskPage = (props: IProps) => {
 
   const handleDeleteTask = async () => {
     try {
-      const res: IResponse<any> = await axios.delete(`/api/tasks/${taskId}`);
-      if (res) {
-        router.push(`/${projectId}`);
-      }
-    }
-    catch (err) {
-      console.log(err);
+      const { data } = await axios.delete<IResponseDelete>(
+        `/api/tasks/${taskId}`
+      );
+      router.push(`/${projectId}`);
+      notifySuccess("Deleted task successfully");
+    } catch (err) {
+      notifyError(err as string);
     }
   };
   return (

@@ -7,20 +7,19 @@ const instance = axios.create({
 });
 
 instance.interceptors.request.use(
-  function (config) {
+  async (config) => {
     return config;
   },
-  function (error) {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 instance.interceptors.response.use(
-  function (response) {
-    return response
+  async (response) => {
+    return response;
   },
-  async function (error) {
-    return error ?? Promise.reject(error);
+  (error) => {
+    const errorMessage = error?.response?.data?.message || "An error occurred";
+    return Promise.reject(errorMessage);
   }
 );
 

@@ -1,6 +1,5 @@
 "use client";
 import { IAssignee } from "@/types/assignee.interface";
-import { IResponse } from "@/types/response.interface";
 import { ITask, IUpdateTask } from "@/types/task.interface";
 import { IUser } from "@/types/user.interface";
 import axios from "@/config/axios-customize";
@@ -8,14 +7,20 @@ import moment from "moment";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import Select from "react-select";
+import { notifyError, notifySuccess } from "@/lib/notify";
 
 type IProps = {
   params: { id: string };
   searchParams: { [key: string]: string | string[] | undefined };
 };
+
+type SelectItemType = {
+  label: string;
+  value: number;
+};
 const UpdateTaskPage = (props: IProps) => {
   const taskId = props.params.id;
-  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [task, setTask] = useState<ITask | null>(null);
   const [users, setUsers] = useState<IUser[]>();
   const [defaultAssignees, setDefaultAssignees] = useState<any>([]);
@@ -23,20 +28,18 @@ const UpdateTaskPage = (props: IProps) => {
 
   const fetchTaskById = async () => {
     try {
-      const res: IResponse<any> = await axios.get(`/api/tasks/${taskId}`);
-      if (res && res.data) {
-        setTask(res.data);
-        setDefaultAssignees(
-          res.data?.assignees?.map((u: IAssignee) => {
-            return {
-              label: u.user.fullName,
-              value: u.user.id,
-            };
-          })
-        );
+      const { data } = await axios.get<ITask>(`/api/tasks/${taskId}`);
+      setTask(data);
+      setDefaultAssignees(
+        data.assignees?.map((u: IAssignee) => {
+          return {
+            label: u.user.fullName,
+            value: u.user.id,
+          };
+        })
+      );
 
-        setSelectedIds(res.data?.assignees?.map((u: IAssignee) => u?.user.id));
-      }
+      setSelectedIds(data.assignees?.map((u: IAssignee) => u?.user.id));
     } catch (err) {
       console.log(err);
     }
@@ -44,10 +47,8 @@ const UpdateTaskPage = (props: IProps) => {
 
   const fetchUsers = async () => {
     try {
-      const res: IResponse<IUser[]> = await axios.get(`/api/users`);
-      if (res && res.data) {
-        setUsers(res.data);
-      }
+      const { data } = await axios.get<IUser[]>(`/api/users`);
+      setUsers(data);
     } catch (err) {
       console.log(err);
     }
@@ -61,38 +62,42 @@ const UpdateTaskPage = (props: IProps) => {
     fetchUsers();
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<any>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setTask((prevData: any) => ({ ...prevData, [name]: value }));
+    setTask((prevData: ITask | any) => ({ ...prevData, [name]: value }));
   };
 
   const handleChange = (value: any) => {
     setDefaultAssignees(
-      value.map((option: any) => {
+      value.map((option: SelectItemType) => {
         return {
           value: Number(option.value),
           label: option.label,
         };
       })
     );
-    setSelectedIds(value.map((option: any) => Number(option.value)));
+    setSelectedIds(value.map((option: SelectItemType) => option.value));
   };
 
   const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data: IUpdateTask | any = {
+    const updateTaskData: IUpdateTask | any = {
       name: task?.name,
       status: task?.status,
       deadline: task?.deadline,
       assigneeIds: selectedIds,
     };
     try {
-      const res = await axios.patch(`/api/tasks/${taskId}`, data);
-      if (res && res.data) {
-        router.push(`/tasks/${taskId}`);
-      }
+      const { data } = await axios.patch<ITask>(
+        `/api/tasks/${taskId}`,
+        updateTaskData
+      );
+      router.push(`/tasks/${taskId}`);
+      notifySuccess("Updated task successfully");
     } catch (err) {
-      console.log(err);
+      notifyError(err as string);
     }
   };
 

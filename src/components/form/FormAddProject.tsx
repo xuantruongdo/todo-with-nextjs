@@ -1,10 +1,10 @@
 "use client";
 
 import { IProject } from "@/types/project.interface";
-import { IResponse } from "@/types/response.interface";
 import axios from "@/config/axios-customize";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { notifyError, notifySuccess } from "@/lib/notify";
 
 interface IProps {
   closeModal: () => void;
@@ -18,21 +18,20 @@ const FormAddProject = (props: IProps) => {
 
   const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data = {
+    const projectData = {
       name: projectName,
     };
     setIsLoading(true);
     try {
-      const res: IResponse<IProject> = await axios.post("/api/projects", data);
-
-      if (res && res.data) {
-        setProjects((prevData: IProject[]) => [...prevData, res.data]);
-        router.push(`/${res.data.id}`);
-        router.refresh();
-        closeModal();
-      }
+      const { data } = await axios.post("/api/projects", projectData);
+      setProjects((prevData: IProject[]) => [...prevData, data]);
+      router.push(`/${data.id}`);
+      router.refresh();
+      closeModal();
+      notifySuccess("Created project successfully");
     } catch (err) {
       console.log(err);
+      notifyError(err as string);
     } finally {
       setIsLoading(false);
     }

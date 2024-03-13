@@ -1,10 +1,11 @@
 "use client";
 
+import { notifyError, notifySuccess } from "@/lib/notify";
 import { IRegister } from "@/types/auth.interface";
-import axios from "axios";
-import { signIn } from "next-auth/react";
+import { IUser } from "@/types/user.interface";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import axios from "@/config/axios-customize";
 
 const SignUp = () => {
   const router = useRouter();
@@ -26,17 +27,26 @@ const SignUp = () => {
   const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (formData.password === formData.confirmPassword) {
-      const data: IRegister = {
+      const registerData: IRegister = {
         fullName: formData.fullName,
         email: formData.email,
         password: formData.password,
       };
       setIsLoading(true);
-      const res = await axios.post("/api/users/register", data);
-      setIsLoading(false);
-      if (res && res.data) {
+      try {
+        const {data} = await axios.post<IUser>(
+          "/api/users/register",
+          registerData
+        );
         router.push("/auth/signIn");
+        notifySuccess("Register new user successfully");
+      } catch (err) {
+        notifyError(err as string)
+      } finally {
+        setIsLoading(false);
       }
+    } else {
+      notifyError("Password does not match");
     }
   };
   return (

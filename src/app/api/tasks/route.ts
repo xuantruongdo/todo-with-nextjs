@@ -7,67 +7,6 @@ import { ICreateTask } from "@/types/task.interface";
 
 const prisma = new PrismaClient();
 
-export const GET = async (req: Request) => {
-  const url = new URL(req.url!);
-  const searchParams = new URLSearchParams(url.searchParams);
-
-  const name = searchParams.get("name");
-  const assigneeId = searchParams.get("assigneeId");
-  const from = searchParams.get("from");
-  const to = searchParams.get("to");
-
-  const page = parseInt(searchParams.get("page") || "1");
-  const pageSize = parseInt(searchParams.get("pageSize") || "5");
-
-  try {
-    const where: any = {};
-
-    if (name) {
-      where.name = { contains: name };
-    }
-
-    if (assigneeId) {
-      where.assigneeId = { equals: Number(assigneeId) };
-    }
-    if (from && to) {
-      where.deadline = {
-        gte: new Date(from),
-        lte: new Date(to),
-      };
-    }
-
-    const totalCount = await prisma.tasks.count({
-      where: where,
-    });
-
-    const totalPages = Math.ceil(totalCount / pageSize);
-
-    const tasks = await prisma.tasks.findMany({
-      select: {
-        id: true,
-        name: true,
-        status: true,
-        deadline: true,
-      },
-      where: where,
-      orderBy: {
-        id: "desc",
-      },
-      take: pageSize,
-      skip: (page - 1) * pageSize,
-    });
-
-    return NextResponse.json({ tasks, totalPages }, { status: 200 });
-  } catch (error) {
-    console.error(error);
-
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
-  }
-};
-
 export const POST = async (request: Request) => {
   try {
     const session = await getServerSession(authOptions);
@@ -82,19 +21,17 @@ export const POST = async (request: Request) => {
         assignees: {
           createMany: {
             data: body.assigneeIds.map((id: number) => ({
-              userId: id
-            }))
-          }
+              userId: id,
+            })),
+          },
         },
       },
     });
 
     return NextResponse.json(task, { status: 201 });
   } catch (error) {
-    console.error(error);
-
     return NextResponse.json(
-      { message: "Internal Server Error" },
+      { message: "Error when creating task" },
       { status: 500 }
     );
   }
