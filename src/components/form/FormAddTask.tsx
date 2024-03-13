@@ -3,17 +3,17 @@
 import { IResponse } from "@/types/response.interface";
 import { ICreateTask, ITask } from "@/types/task.interface";
 import { IUser } from "@/types/user.interface";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import Select from "react-select";
+import axios from "@/config/axios-customize";
 
 interface IProps {
   projectId: number;
-  fetchTasksByProjectId: () => void;
+  setTasks: (tasks: any) => void;
   closeModal: () => void;
 }
 const FormAddTask = (props: IProps) => {
-  const { projectId, fetchTasksByProjectId, closeModal } = props;
+  const { projectId, setTasks, closeModal } = props;
   const [taskName, setTaskName] = useState<string>("");
   const [deadline, setDeadline] = useState<string>("");
   const [selectedIds, setSelectedIds] = useState([]);
@@ -22,9 +22,13 @@ const FormAddTask = (props: IProps) => {
   const [users, setUsers] = useState<IUser[]>([]);
 
   const fetchUsers = async () => {
-    const res: IResponse<IUser[]> = await axios.get(`/api/users`);
-    if (res && res.data) {
-      setUsers(res.data);
+    try {
+      const res: IResponse<IUser[]> = await axios.get(`/api/users`);
+      if (res && res.data) {
+        setUsers(res.data);
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -32,7 +36,7 @@ const FormAddTask = (props: IProps) => {
     fetchUsers();
   }, []);
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data: ICreateTask = {
       name: taskName,
@@ -42,15 +46,19 @@ const FormAddTask = (props: IProps) => {
     };
 
     setIsLoading(true);
-    const res: IResponse<ITask> = await axios.post("/api/tasks", data);
-    setIsLoading(false);
-
-    if (res && res.data) {
-      fetchTasksByProjectId();
-      setTaskName("");
-      setDeadline("");
-      setSelectedIds([]);
-      closeModal();
+    try {
+      const res: IResponse<ITask> = await axios.post("/api/tasks", data);
+      if (res && res.data) {
+        setTasks((prevTasks: ITask[]) => [res.data, ...prevTasks]);
+        setTaskName("");
+        setDeadline("");
+        setSelectedIds([]);
+        closeModal();
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 

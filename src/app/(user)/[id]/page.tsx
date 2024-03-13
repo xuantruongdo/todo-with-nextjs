@@ -4,12 +4,13 @@ import FormAddTask from "@/components/form/FormAddTask";
 import FormFilter from "@/components/form/FormFilter";
 import Modal from "@/components/modal/Modal";
 import Pagination from "@/components/pagination/Pagination";
+import { initFilter } from "@/constants/constant";
 import useModal from "@/hooks/useModal";
 import { IFilter } from "@/types/filter.interface";
 import { IProject } from "@/types/project.interface";
 import { IResponse } from "@/types/response.interface";
 import { ITask } from "@/types/task.interface";
-import axios from "axios";
+import axios from "@/config/axios-customize";
 import moment from "moment";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -20,18 +21,13 @@ type IProps = {
 };
 const DetailProjectPage = (props: IProps) => {
   const projectId = props.params.id;
-  const [project, setProject] = useState<IProject>();
-  const [tasks, setTasks] = useState<ITask[]>();
+  const [project, setProject] = useState<IProject | null>(null);
+  const [tasks, setTasks] = useState<ITask[] | null>(null);
   const [page, setPage] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [totalPage, setTotalPage] = useState<number>(0);
   const { isOpen, openModal, closeModal } = useModal();
-  const [filter, setFilter] = useState({
-    name: "",
-    status: "",
-    from: "",
-    to: "",
-  });
+  const [filter, setFilter] = useState(initFilter);
 
   const fetchProjectById = async () => {
     setIsLoading(true);
@@ -64,15 +60,20 @@ const DetailProjectPage = (props: IProps) => {
     if (filter.to !== "") {
       params.to = filter.to;
     }
-    const res: IResponse<any> = await axios.get(
-      `/api/tasks/projectId/${projectId}`,
-      {
-        params: params,
+
+    try {
+      const res: IResponse<any> = await axios.get(
+        `/api/tasks/projectId/${projectId}`,
+        {
+          params: params,
+        }
+      );
+      if (res && res.data) {
+        setTasks(res.data.tasks);
+        setTotalPage(res.data.totalPages);
       }
-    );
-    if (res && res.data) {
-      setTasks(res.data.tasks);
-      setTotalPage(res.data.totalPages);
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -88,16 +89,11 @@ const DetailProjectPage = (props: IProps) => {
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    setFilter((prevData: any) => ({ ...prevData, [name]: value }));
+    setFilter((prevData) => ({ ...prevData, [name]: value }));
   };
 
   const clearFilter = () => {
-    setFilter({
-      name: "",
-      status: "",
-      from: "",
-      to: "",
-    });
+    setFilter(initFilter);
   };
 
   return (
@@ -116,7 +112,7 @@ const DetailProjectPage = (props: IProps) => {
       <Modal isOpen={isOpen} closeModal={closeModal}>
         <FormAddTask
           projectId={Number(projectId)}
-          fetchTasksByProjectId={fetchTasksByProjectId}
+          setTasks={setTasks}
           closeModal={closeModal}
         />
       </Modal>

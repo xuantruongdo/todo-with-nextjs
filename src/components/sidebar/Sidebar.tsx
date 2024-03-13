@@ -2,7 +2,7 @@
 
 import useModal from "@/hooks/useModal";
 import { IProject } from "@/types/project.interface";
-import axios from "axios";
+import axios from "@/config/axios-customize";
 import ProjectItem from "../projectItem/ProjectItem";
 import { useEffect, useState } from "react";
 import { IResponse } from "@/types/response.interface";
@@ -13,9 +13,13 @@ const Sidebar = () => {
   const [projects, setProjects] = useState<IProject[]>([]);
   const { isOpen, openModal, closeModal } = useModal();
   const fetchProjects = async () => {
-    const res: IResponse<IProject[]> = await axios.get(`/api/projects`);
-    if (res && res.data) {
-      setProjects(res.data);
+    try {
+      const res: IResponse<IProject[]> = await axios.get(`/api/projects`);
+      if (res && res.data) {
+        setProjects(res.data);
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -39,7 +43,7 @@ const Sidebar = () => {
         </button>
       </div>
       <Modal isOpen={isOpen} closeModal={closeModal}>
-        <FormAddProject closeModal={closeModal} fetchProjects={fetchProjects} />
+        <FormAddProject closeModal={closeModal} setProjects={setProjects} />
       </Modal>
       <ul className="space-y-2">
         {projects?.length > 0 ? (
@@ -47,7 +51,7 @@ const Sidebar = () => {
             <ProjectItem
               key={project?.id}
               project={project}
-              fetchProjects={fetchProjects}
+              setProjects={setProjects}
             />
           ))
         ) : (

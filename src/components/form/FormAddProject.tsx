@@ -2,33 +2,39 @@
 
 import { IProject } from "@/types/project.interface";
 import { IResponse } from "@/types/response.interface";
-import axios from "axios";
+import axios from "@/config/axios-customize";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface IProps {
   closeModal: () => void;
-  fetchProjects: () => void;
+  setProjects: (projects: any) => void;
 }
 const FormAddProject = (props: IProps) => {
-  const { closeModal, fetchProjects } = props;
+  const { closeModal, setProjects } = props;
   const router = useRouter();
   const [projectName, setProjectName] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data = {
       name: projectName,
     };
     setIsLoading(true);
-    const res: IResponse<IProject> = await axios.post("/api/projects", data);
-    setIsLoading(false);
-    if (res && res.data) {
-      router.push(`/${res.data.id}`);
-      fetchProjects();
-      router.refresh();
-      closeModal();
+    try {
+      const res: IResponse<IProject> = await axios.post("/api/projects", data);
+
+      if (res && res.data) {
+        setProjects((prevData: IProject[]) => [...prevData, res.data]);
+        router.push(`/${res.data.id}`);
+        router.refresh();
+        closeModal();
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 

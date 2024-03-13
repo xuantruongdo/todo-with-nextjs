@@ -28,19 +28,33 @@ const FormUpdateCheckList = (props: IProps) => {
       checked: checklist?.checked,
     };
     setIsLoading(true);
-    const res: IResponse<ICheckList> = await axios.patch(`/api/checklists/${checklist?.id}`, data);
-    setIsLoading(false);
-    if (res && res.data) {
-      fetchTaskById();
-      closeModal();
+    try {
+      const res: IResponse<ICheckList> = await axios.patch(
+        `/api/checklists/${checklist?.id}`,
+        data
+      );
+      if (res && res.data) {
+        fetchTaskById();
+        closeModal();
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleDeleteCheckList = async () => {
-    const res: IResponse<any> = await axios.delete(`/api/checklists/${checklist?.id}`);
-    if (res && res.data) {
-      fetchTaskById();
-      closeModal();
+    try {
+      const res: IResponse<any> = await axios.delete(
+        `/api/checklists/${checklist?.id}`
+      );
+      if (res && res.data) {
+        fetchTaskById();
+        closeModal();
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 

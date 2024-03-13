@@ -7,7 +7,7 @@ import useModal from "@/hooks/useModal";
 import { ICheckList, ICreateCheckList } from "@/types/checklist.interface";
 import { IResponse } from "@/types/response.interface";
 import { ITask } from "@/types/task.interface";
-import axios from "axios";
+import axios from "@/config/axios-customize";
 import moment from "moment";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -20,17 +20,24 @@ const DetailTaskPage = (props: IProps) => {
   const taskId = props.params.id;
   const { isOpen, openModal, closeModal } = useModal();
 
-  const [task, setTask] = useState<ITask>();
-  const [checklist, setChecklist] = useState<ICheckList>();
+  const [task, setTask] = useState<ITask | null>(null);
+  const [checklist, setChecklist] = useState<ICheckList | null>(null);
   const [title, setTitle] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchTaskById = async () => {
     setIsLoading(true);
-    const res: IResponse<ITask> = await axios.get(`/api/tasks/${taskId}`);
-    setIsLoading(false);
-    if (res && res.data) {
-      setTask(res.data);
+    try {
+      const res: IResponse<ITask> = await axios.get(`/api/tasks/${taskId}`);
+      if (res && res.data) {
+        setTask(res.data);
+      }
+    }
+    catch (err) {
+      console.log(err);
+    }
+    finally {
+      setIsLoading(false);
     }
   };
 
@@ -43,16 +50,19 @@ const DetailTaskPage = (props: IProps) => {
       title: title,
       taskId: Number(taskId),
     };
-    
-    const res: IResponse<ICheckList> = await axios.post("/api/checklists", data);
-    
-    if (res && res.data) {
-      fetchTaskById();
-      setTitle("");
+
+    try {
+      const res: IResponse<ICheckList> = await axios.post("/api/checklists", data);
+      if (res && res.data) {
+        fetchTaskById();
+        setTitle("");
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
-  if(isLoading) return <TaskSkeleton/>
+  if (isLoading) return <TaskSkeleton />;
 
   return (
     <div className="mx-auto sm:px-10 md:px-8 lg:px-14 xl:px-20 mt-40">

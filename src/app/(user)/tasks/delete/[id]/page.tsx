@@ -1,7 +1,7 @@
 "use client";
 
 import { IResponse } from "@/types/response.interface";
-import axios from "axios";
+import axios from "@/config/axios-customize";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -15,9 +15,14 @@ const DeleteTaskPage = (props: IProps) => {
   const router = useRouter();
 
   const handleDeleteTask = async () => {
-    const res: IResponse<any> = await axios.delete(`/api/tasks/${taskId}`);
-    if (res) {
-      router.push(`/${projectId}`);
+    try {
+      const res: IResponse<any> = await axios.delete(`/api/tasks/${taskId}`);
+      if (res) {
+        router.push(`/${projectId}`);
+      }
+    }
+    catch (err) {
+      console.log(err);
     }
   };
   return (

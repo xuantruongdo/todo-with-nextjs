@@ -1,8 +1,9 @@
 "use client";
+import { IAssignee } from "@/types/assignee.interface";
 import { IResponse } from "@/types/response.interface";
 import { ITask, IUpdateTask } from "@/types/task.interface";
 import { IUser } from "@/types/user.interface";
-import axios from "axios";
+import axios from "@/config/axios-customize";
 import moment from "moment";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -15,34 +16,40 @@ type IProps = {
 const UpdateTaskPage = (props: IProps) => {
   const taskId = props.params.id;
   const [selectedIds, setSelectedIds] = useState([]);
-  const [task, setTask] = useState<ITask>();
+  const [task, setTask] = useState<ITask | null>(null);
   const [users, setUsers] = useState<IUser[]>();
   const [defaultAssignees, setDefaultAssignees] = useState<any>([]);
   const router = useRouter();
 
   const fetchTaskById = async () => {
-    const res: IResponse<any> = await axios.get(`/api/tasks/${taskId}`);
-    if (res && res.data) {
-      setTask(res.data);
-      setDefaultAssignees(
-        res.data?.assignees?.map((u: any) => {
-          return {
-            label: u.user.fullName,
-            value: u.user.id,
-          };
-        })
-      );
+    try {
+      const res: IResponse<any> = await axios.get(`/api/tasks/${taskId}`);
+      if (res && res.data) {
+        setTask(res.data);
+        setDefaultAssignees(
+          res.data?.assignees?.map((u: IAssignee) => {
+            return {
+              label: u.user.fullName,
+              value: u.user.id,
+            };
+          })
+        );
 
-      setSelectedIds(
-        res.data?.assignees?.map((u: any) => u?.user.id)
-      );
+        setSelectedIds(res.data?.assignees?.map((u: IAssignee) => u?.user.id));
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
   const fetchUsers = async () => {
-    const res: IResponse<IUser[]> = await axios.get(`/api/users`);
-    if (res && res.data) {
-      setUsers(res.data);
+    try {
+      const res: IResponse<IUser[]> = await axios.get(`/api/users`);
+      if (res && res.data) {
+        setUsers(res.data);
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -79,9 +86,13 @@ const UpdateTaskPage = (props: IProps) => {
       deadline: task?.deadline,
       assigneeIds: selectedIds,
     };
-    const res = await axios.patch(`/api/tasks/${taskId}`, data);
-    if (res && res.data) {
-      router.push(`/tasks/${taskId}`);
+    try {
+      const res = await axios.patch(`/api/tasks/${taskId}`, data);
+      if (res && res.data) {
+        router.push(`/tasks/${taskId}`);
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 

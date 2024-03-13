@@ -1,7 +1,5 @@
 "use client";
 
-import { IFilter } from "@/types/filter.interface";
-
 interface IProps {
   filter: {
     name: string;
