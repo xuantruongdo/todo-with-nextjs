@@ -14,7 +14,7 @@ export const authOptions: AuthOptions = {
       async authorize(credentials) {
         try {
           const { data } = await axios.post(
-            "http://localhost:3000/api/users/login",
+            "https://todo-with-nextjs-rouge.vercel.app/api/users/login",
             {
               username: credentials?.username,
               password: credentials?.password,
